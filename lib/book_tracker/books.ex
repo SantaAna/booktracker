@@ -7,6 +7,8 @@ defmodule BookTracker.Books do
   alias BookTracker.Repo
 
   alias BookTracker.Books.Book
+  alias BookTracker.Authors.Author
+  alias BookTracker.AuthorsBooks.AuthorBook
 
   @doc """
   Returns the list of books.
@@ -71,6 +73,15 @@ defmodule BookTracker.Books do
     book
     |> Book.changeset(attrs)
     |> Repo.update()
+  end
+
+  def add_author(%Book{} = book, author_info = %{"first_name" => _first_name, "last_name" => _last_name}) do
+    {:ok, author} = BookTracker.Authors.create_author(author_info)  
+    add_author(book, author)
+  end
+
+  def add_author(%Book{id: book_id}, %Author{id: author_id}) do
+    Repo.insert(%AuthorBook{book_id: book_id, author_id: author_id})
   end
 
   @doc """

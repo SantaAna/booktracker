@@ -4,7 +4,7 @@ defmodule BookTracker.Genres.Genre do
 
   schema "genres" do
     field :name, :string
-
+    many_to_many :books, BookTracker.Books.Book, join_through: "books_genres"
     timestamps(type: :utc_datetime)
   end
 

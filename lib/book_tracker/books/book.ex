@@ -8,6 +8,8 @@ defmodule BookTracker.Books.Book do
     field :summary, :string
     field :isbn10, :string
     field :isbn13, :string
+    many_to_many :authors, BookTracker.Authors.Author, join_through: "authors_books"
+    many_to_many :genres, BookTracker.Genres.Genre, join_through: "books_genres"
 
     timestamps(type: :utc_datetime)
   end

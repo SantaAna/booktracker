@@ -6,6 +6,7 @@ defmodule BookTracker.Authors.Author do
     field :first_name, :string
     field :last_name, :string
     field :bio_notes, :string
+    many_to_many :books, BookTracker.Books.Book, join_through: "authors_books"
 
     timestamps(type: :utc_datetime)
   end
@@ -14,6 +15,6 @@ defmodule BookTracker.Authors.Author do
   def changeset(author, attrs) do
     author
     |> cast(attrs, [:first_name, :last_name, :bio_notes])
-    |> validate_required([:first_name, :last_name, :bio_notes])
+    |> validate_required([:first_name, :last_name])
   end
 end
