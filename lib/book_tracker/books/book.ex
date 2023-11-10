@@ -1,6 +1,7 @@
 defmodule BookTracker.Books.Book do
   use Ecto.Schema
   import Ecto.Changeset
+  alias BookTracker.Authors.Author
 
   schema "books" do
     field :title, :string
@@ -20,4 +21,28 @@ defmodule BookTracker.Books.Book do
     |> cast(attrs, [:title, :page_count, :summary, :isbn10, :isbn13])
     |> validate_required([:title, :page_count, :summary, :isbn10, :isbn13])
   end
+
+  @doc """
+  It is possible for this function to raise at run time if the third argument 
+  is not a list of author structs - it is up to the caller to provide this list!
+
+  Will create a changeset for a new book with the associated authors.
+  """
+  def changeset_with_authors(book, attrs, authors) do
+    if all_author_structs?(authors) do
+      changeset(book, attrs)
+      |> put_assoc(:authors, authors)
+    else 
+      raise("You must provide a list of author structs as the last argument!")
+    end
+  end
+
+  defp all_author_structs?(authors) when is_list(authors) do
+    Enum.reduce(authors, true, fn
+      %Author{} = _author, acc -> acc
+      _, _ -> false
+    end)
+  end
+
+  defp all_author_structs?(_authors), do: false
 end
