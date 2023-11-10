@@ -112,4 +112,11 @@ defmodule BookTracker.Books do
   def change_book(%Book{} = book, attrs \\ %{}) do
     Book.changeset(book, attrs)
   end
+ 
+  @doc """
+  Can raise if a list of author structs is not provided by the caller.
+  """
+  def change_book_authors(%Book{} = book, attrs \\ %{}, authors \\ []) do
+    Book.changeset_with_authors(book, attrs, authors)
+  end
 end
