@@ -18,6 +18,7 @@ defmodule BookTrackerWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    live "books/new", NewBookLive 
   end
 
   # Other scopes may use custom stacks.
