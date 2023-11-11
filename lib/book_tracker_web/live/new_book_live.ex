@@ -2,10 +2,11 @@ defmodule BookTrackerWeb.NewBookLive do
   use BookTrackerWeb, :live_view
   alias BookTracker.Books
   alias BookTracker.Books.Book
+  alias BookTrackerWeb.LiveComponents.MatchAndSelect
 
   def mount(_, _, socket) do
     socket
-    |> assign(:book_form, to_form(Books.change_book_authors(%Book{})))
+    |> assign(:book_form, to_form(Books.change_book(%Book{})))
     |> then(&{:ok, &1})
   end
 
@@ -18,6 +19,7 @@ defmodule BookTrackerWeb.NewBookLive do
       <.input type="number" field={@book_form[:page_count]} label="Page Count" />
       <.input type="text" field={@book_form[:isbn10]} label="ISBN-10" />
       <.input type="text" field={@book_form[:isbn13]} label="ISBN-13" />
+      <.live_component module={MatchAndSelect} id="author-select"/>
       <.button>Add</.button>
     </.form>
     """
