@@ -129,7 +129,7 @@ defmodule BookTracker.AuthorsTest do
           %{first_name: "dirk", last_name: "struthers"},
           %{first_name: "dirk", last_name: "smith"}
         ]
-        |> Enum.map(&author_fixture/1) 
+        |> Enum.map(&author_fixture/1)
 
       assert Authors.get_author_by_name("d", floop: :baz) == [match_1, match_2]
     end

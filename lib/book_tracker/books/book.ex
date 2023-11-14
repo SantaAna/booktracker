@@ -32,7 +32,7 @@ defmodule BookTracker.Books.Book do
     if all_author_structs?(authors) do
       changeset(book, attrs)
       |> put_assoc(:authors, authors)
-    else 
+    else
       raise("You must provide a list of author structs as the last argument!")
     end
   end

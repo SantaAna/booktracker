@@ -101,7 +101,7 @@ defmodule BookTracker.Authors do
   def change_author(%Author{} = author, attrs \\ %{}) do
     Author.changeset(author, attrs)
   end
-  
+
   @doc """
   Fetches an author by the given name.  Only supports a name given in the format "first_name last_name" or "last_name".
 
@@ -114,37 +114,46 @@ defmodule BookTracker.Authors do
   def get_author_by_name(name, opts \\ [limit: 3])
 
   def get_author_by_name("", _opts), do: []
-  
+
   def get_author_by_name(name, opts) when is_binary(name) do
     get_author_by_name(String.split(name, " ", trim: true), opts)
   end
-  
+
   def get_author_by_name([first_name], opts) do
     first_name_match = leading_match_maker(first_name)
     opts = get_author_default_opts(opts)
 
-    q = from a in Author,
-      where: ilike(a.first_name, ^first_name_match), 
-      limit: ^Keyword.get(opts, :limit)
+    q =
+      from a in Author,
+        where: ilike(a.first_name, ^first_name_match),
+        limit: ^Keyword.get(opts, :limit)
+
     Repo.all(q)
   end
 
   def get_author_by_name([first_name, last_name], opts) do
     [first_name_match, last_name_match] =
       Enum.map([first_name, last_name], &leading_match_maker/1)
+
     opts = get_author_default_opts(opts)
 
-    q = from a in Author,
-      where: ilike(a.first_name, ^first_name_match),
-      where: ilike(a.last_name, ^last_name_match),
-      limit: ^Keyword.get(opts, :limit)
+    q =
+      from a in Author,
+        where: ilike(a.first_name, ^first_name_match),
+        where: ilike(a.last_name, ^last_name_match),
+        limit: ^Keyword.get(opts, :limit)
+
     Repo.all(q)
   end
 
   defp get_author_default_opts(opts), do: Keyword.merge([limit: 3], opts)
 
-
-  def get_author_by_name(_invalid, opts), do: raise(ArgumentError, "Must provide author first and last name as a binary or list of binaries.")
+  def get_author_by_name(_invalid, opts),
+    do:
+      raise(
+        ArgumentError,
+        "Must provide author first and last name as a binary or list of binaries."
+      )
 
   def leading_match_maker(string), do: "#{string}%"
 end

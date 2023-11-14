@@ -56,9 +56,9 @@ defmodule BookTracker.Books do
     |> Book.changeset(attrs)
     |> Repo.insert()
   end
-  
+
   def create_book(attrs, authors) when is_list(authors) do
-    %Book{} 
+    %Book{}
     |> Book.changeset_with_authors(attrs, authors)
     |> Repo.insert()
   end
@@ -81,8 +81,11 @@ defmodule BookTracker.Books do
     |> Repo.update()
   end
 
-  def add_author(%Book{} = book, author_info = %{"first_name" => _first_name, "last_name" => _last_name}) do
-    {:ok, author} = BookTracker.Authors.create_author(author_info)  
+  def add_author(
+        %Book{} = book,
+        author_info = %{"first_name" => _first_name, "last_name" => _last_name}
+      ) do
+    {:ok, author} = BookTracker.Authors.create_author(author_info)
     add_author(book, author)
   end
 
@@ -118,7 +121,7 @@ defmodule BookTracker.Books do
   def change_book(%Book{} = book, attrs \\ %{}) do
     Book.changeset(book, attrs)
   end
- 
+
   @doc """
   Can raise if a list of author structs is not provided by the caller.
   """

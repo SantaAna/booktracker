@@ -21,7 +21,13 @@ defmodule BookTracker.BooksTest do
     end
 
     test "create_book/1 with valid data creates a book" do
-      valid_attrs = %{title: "some title", page_count: 42, summary: "some summary", isbn10: "some isbn10", isbn13: "some isbn13"}
+      valid_attrs = %{
+        title: "some title",
+        page_count: 42,
+        summary: "some summary",
+        isbn10: "some isbn10",
+        isbn13: "some isbn13"
+      }
 
       assert {:ok, %Book{} = book} = Books.create_book(valid_attrs)
       assert book.title == "some title"
@@ -37,7 +43,14 @@ defmodule BookTracker.BooksTest do
 
     test "update_book/2 with valid data updates the book" do
       book = book_fixture()
-      update_attrs = %{title: "some updated title", page_count: 43, summary: "some updated summary", isbn10: "some updated isbn10", isbn13: "some updated isbn13"}
+
+      update_attrs = %{
+        title: "some updated title",
+        page_count: 43,
+        summary: "some updated summary",
+        isbn10: "some updated isbn10",
+        isbn13: "some updated isbn13"
+      }
 
       assert {:ok, %Book{} = book} = Books.update_book(book, update_attrs)
       assert book.title == "some updated title"
