@@ -122,5 +122,16 @@ defmodule BookTracker.AuthorsTest do
       assert Authors.get_author_by_name("dirk", limit: 2) == [match_1, match_2]
       assert Authors.get_author_by_name("dirk s", limit: 1) == [match_1]
     end
+
+    test "get_author_by_name/1 will work with scrambled opts" do
+      [match_1, match_2] =
+        [
+          %{first_name: "dirk", last_name: "struthers"},
+          %{first_name: "dirk", last_name: "smith"}
+        ]
+        |> Enum.map(&author_fixture/1) 
+
+      assert Authors.get_author_by_name("d", floop: :baz) == [match_1, match_2]
+    end
   end
 end

@@ -121,6 +121,7 @@ defmodule BookTracker.Authors do
   
   def get_author_by_name([first_name], opts) do
     first_name_match = leading_match_maker(first_name)
+    opts = get_author_default_opts(opts)
 
     q = from a in Author,
       where: ilike(a.first_name, ^first_name_match), 
@@ -131,6 +132,7 @@ defmodule BookTracker.Authors do
   def get_author_by_name([first_name, last_name], opts) do
     [first_name_match, last_name_match] =
       Enum.map([first_name, last_name], &leading_match_maker/1)
+    opts = get_author_default_opts(opts)
 
     q = from a in Author,
       where: ilike(a.first_name, ^first_name_match),
@@ -138,6 +140,8 @@ defmodule BookTracker.Authors do
       limit: ^Keyword.get(opts, :limit)
     Repo.all(q)
   end
+
+  defp get_author_default_opts(opts), do: Keyword.merge([limit: 3], opts)
 
 
   def get_author_by_name(_invalid, opts), do: raise(ArgumentError, "Must provide author first and last name as a binary or list of binaries.")
