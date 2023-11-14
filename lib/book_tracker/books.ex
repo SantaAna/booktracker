@@ -56,6 +56,12 @@ defmodule BookTracker.Books do
     |> Book.changeset(attrs)
     |> Repo.insert()
   end
+  
+  def create_book(attrs, authors) when is_list(authors) do
+    %Book{} 
+    |> Book.changeset_with_authors(attrs, authors)
+    |> Repo.insert()
+  end
 
   @doc """
   Updates a book.
