@@ -101,4 +101,39 @@ defmodule BookTracker.Authors do
   def change_author(%Author{} = author, attrs \\ %{}) do
     Author.changeset(author, attrs)
   end
+  
+  @doc """
+  Fetches an author by the given name.  Only supports a name given in the format "first_name last_name" or "last_name".
+
+  Returns a list of authors that match the given name string (case insensitive matching is used), an empty list is returned if 
+  no matching authors are found or if given an empty string as an argument.
+  """
+  def get_author_by_name(""), do: []
+
+  def get_author_by_name(name) when is_binary(name) do
+    get_author_by_name(String.split(name, " ", trim: true))
+  end
+  
+  def get_author_by_name([first_name]) do
+    first_name_match = leading_match_maker(first_name)
+
+    q = from a in Author,
+      where: ilike(a.first_name, ^first_name_match)
+    Repo.all(q)
+  end
+
+  def get_author_by_name([first_name, last_name]) do
+    [first_name_match, last_name_match] =
+      Enum.map([first_name, last_name], &leading_match_maker/1)
+
+    q = from a in Author,
+      where: ilike(a.first_name, ^first_name_match),
+      where: ilike(a.last_name, ^last_name_match)
+    Repo.all(q)
+  end
+
+
+  def get_author_by_name(_invalid), do: raise(ArgumentError, "Must provide author first and last name as a binary or list of binaries.")
+
+  def leading_match_maker(string), do: "#{string}%"
 end
