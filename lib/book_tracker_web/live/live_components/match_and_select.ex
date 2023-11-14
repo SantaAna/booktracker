@@ -1,24 +1,20 @@
 defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
   use BookTrackerWeb, :live_component
+  alias BookTracker.Authors
 
   @events %{
-    "author-selected" => "indicates that an author has been selected by the user."
+    "author-selected" => "author has been selected by the user.",
+    "update-author" => "author text field has changed",
+    "author-removed" => "selected author has been clicked, indicated removal"
   }
 
-  def update(assigns, socket) do
-    assigns =
-      Map.merge(assigns, socket.assigns)
-      |> Map.put(:author_input, "")
-      |> Map.put(:author_matches, [
-        %{
-          first_name: "dirk",
-          last_name: "struthers",
-          id: 1
-        }
-      ])
-      |> Map.put(:selected_authors, [])
 
-    {:ok, Map.put(socket, :assigns, assigns)}
+  def mount(socket) do
+      socket
+      |> assign(:author_input, "")
+      |> assign(:author_matches, [])
+      |> assign(:selected_authors, [])
+      |> then(&{:ok, &1})
   end
 
   def render(assigns) do
@@ -30,6 +26,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
         name="author"
         value=""
         phx-change="update-author"
+        phx-debounce="500"
         phx-target={@myself}
       />
       <div class="flex flex-row">
@@ -64,6 +61,15 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
     """
   end
 
+  def handle_event("author-removed", _params = %{"selected-author-id" => author_id}, socket) do
+    update(socket, :selected_authors, fn current -> 
+      Enum.reject(current, fn selected -> 
+        selected.id == String.to_integer(author_id)
+      end)
+    end)
+    |> then(& {:noreply, &1})
+  end
+
   def handle_event("author-selected", %{"selected-author-id" => author_id}, socket) do
     {selected_author, other_suggested} = extract_author_by_id(socket.assigns.author_matches, author_id)
     socket
@@ -72,9 +78,11 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
     |> then(& {:noreply, &1})
   end
 
-  def handle_event("update-author", params, socket) do
-    IO.inspect(params, label: "params from change event")
-    {:noreply, socket}
+  def handle_event("update-author", _params = %{"author" => author_name}, socket) do
+    display_matches = Authors.get_author_by_name(author_name, limit: 3)  
+    |> Enum.reject(fn match -> match in socket.assigns.selected_authors end)
+
+    {:noreply, assign(socket, :author_matches, display_matches)}
   end
 
   def extract_author_by_id(author_list, id) when is_binary(id) do
