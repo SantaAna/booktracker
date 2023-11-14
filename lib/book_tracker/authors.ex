@@ -107,33 +107,40 @@ defmodule BookTracker.Authors do
 
   Returns a list of authors that match the given name string (case insensitive matching is used), an empty list is returned if 
   no matching authors are found or if given an empty string as an argument.
-  """
-  def get_author_by_name(""), do: []
 
-  def get_author_by_name(name) when is_binary(name) do
-    get_author_by_name(String.split(name, " ", trim: true))
+  ## Options
+  limit: limits results returned by DB - defaults to 3.
+  """
+  def get_author_by_name(name, opts \\ [limit: 3])
+
+  def get_author_by_name("", _opts), do: []
+  
+  def get_author_by_name(name, opts) when is_binary(name) do
+    get_author_by_name(String.split(name, " ", trim: true), opts)
   end
   
-  def get_author_by_name([first_name]) do
+  def get_author_by_name([first_name], opts) do
     first_name_match = leading_match_maker(first_name)
 
     q = from a in Author,
-      where: ilike(a.first_name, ^first_name_match)
+      where: ilike(a.first_name, ^first_name_match), 
+      limit: ^Keyword.get(opts, :limit)
     Repo.all(q)
   end
 
-  def get_author_by_name([first_name, last_name]) do
+  def get_author_by_name([first_name, last_name], opts) do
     [first_name_match, last_name_match] =
       Enum.map([first_name, last_name], &leading_match_maker/1)
 
     q = from a in Author,
       where: ilike(a.first_name, ^first_name_match),
-      where: ilike(a.last_name, ^last_name_match)
+      where: ilike(a.last_name, ^last_name_match),
+      limit: ^Keyword.get(opts, :limit)
     Repo.all(q)
   end
 
 
-  def get_author_by_name(_invalid), do: raise(ArgumentError, "Must provide author first and last name as a binary or list of binaries.")
+  def get_author_by_name(_invalid, opts), do: raise(ArgumentError, "Must provide author first and last name as a binary or list of binaries.")
 
   def leading_match_maker(string), do: "#{string}%"
 end
