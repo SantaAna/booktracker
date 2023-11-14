@@ -8,8 +8,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
     "author-removed" => "selected author has been clicked, indicated removal"
   }
 
-
-  def mount(socket) do
+  def update(_assigns, socket) do
       socket
       |> assign(:author_input, "")
       |> assign(:author_matches, [])
@@ -67,6 +66,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
         selected.id == String.to_integer(author_id)
       end)
     end)
+    |> notify_parent()
     |> then(& {:noreply, &1})
   end
 
@@ -75,6 +75,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
     socket
     |> update(:selected_authors, & [selected_author | &1])
     |> assign(:author_matches, other_suggested)
+    |> notify_parent()
     |> then(& {:noreply, &1})
   end
 
@@ -97,6 +98,11 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
       end)
 
     {author, Enum.reverse(reved)}
+  end
+
+  defp notify_parent(socket) do
+    send(self(), {:selected_update, socket.assigns.selected_authors})
+    socket
   end
 
   def get_events(), do: @events
