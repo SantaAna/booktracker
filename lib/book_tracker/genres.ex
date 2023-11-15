@@ -101,4 +101,30 @@ defmodule BookTracker.Genres do
   def change_genre(%Genre{} = genre, attrs \\ %{}) do
     Genre.changeset(genre, attrs)
   end
+
+  @doc """
+  Given a string will find case insensitive matches in the genre
+  table for that string.
+  
+  If a limit option is passed in it will be used to limit the output of the query.
+  """
+  def get_genre_by_name(name, opts \\ [])
+  def get_genre_by_name("", _opts), do: []
+  def get_genre_by_name(name, opts) when is_binary(name) and is_list(opts) do
+    genre_match_string = leading_match_maker(name)
+    opts = get_genre_default_opts(opts)
+
+    q = from g in Genre,
+      where: ilike(g.name, ^genre_match_string),
+      limit: ^Keyword.get(opts, :limit)
+
+    Repo.all(q)
+  end
+
+  def get_genre_by_name(_n, _o) do
+    raise(ArgumentError, "invalid arguments, require string for genre match.  May pass keyword list as options")
+  end
+
+  def leading_match_maker(string), do: "#{string}%"
+  defp get_genre_default_opts(opts), do: Keyword.merge([limit: 3], opts)
 end
