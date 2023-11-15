@@ -22,7 +22,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
       <.input
         type="text"
         label={@input_label}
-        name="item"
+        name={@input_identifier}
         value=""
         phx-change="update-item"
         phx-debounce="500"
@@ -103,7 +103,8 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
     |> then(&{:noreply, &1})
   end
 
-  def handle_event("update-item", _params = %{"item" => item_name}, socket) do
+  def handle_event("update-item", params, socket) do
+    item_name = extract_item_names(socket, params)  
     display_matches =
       socket.assigns.match_function.(item_name, limit: 3)
       |> Enum.reject(fn match -> match in socket.assigns.selected_items end)
@@ -126,8 +127,12 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
   end
 
   defp notify_parent(socket) do
-    send(self(), {:selected_update, socket.assigns.selected_items})
+    send(self(), {:selected_update, socket.assigns.input_identifier,socket.assigns.selected_items})
     socket
+  end
+
+  defp extract_item_names(socket, params) do
+    Map.get(params, socket.assigns.input_identifier)
   end
 
   def get_events(), do: @events
