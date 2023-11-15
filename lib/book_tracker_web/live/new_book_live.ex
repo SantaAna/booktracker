@@ -59,6 +59,7 @@ defmodule BookTrackerWeb.NewBookLive do
         |> assign_new_book_form()
         |> update(:form_reset, &(!&1))
         |> assign(:selected_authors, [])
+        |> assign(:selected_genres, [])
         |> then(&{:noreply, &1})
 
       {:error, cs} ->
