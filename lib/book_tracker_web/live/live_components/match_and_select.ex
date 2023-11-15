@@ -21,7 +21,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
     <div>
       <.input
         type="text"
-        label={@label}
+        label={@input_label}
         name="item"
         value=""
         phx-change="update-item"
@@ -29,7 +29,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
         phx-target={@myself}
       />
       <div class="mt-3 mb-3 bg-gray-200 p-2">
-        <h3>Matches</h3>
+        <h3><%= @match_label %></h3>
         <div class="flex flex-row h-12 gap-1">
           <%= if length(@item_matches) > 0 do %>
             <.item_match :for={item <- @item_matches} item={item} target={@myself} />
@@ -37,7 +37,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
             <p class="p-2 text-xs text-slate-500">None</p>
           <% end %>
         </div>
-        <h3>Added to Book</h3>
+        <h3><%= @selected_label %></h3>
         <div class="flex flex-row h-12 gap-1 mt-1">
           <%= if length(@selected_items) > 0 do %>
             <.item_selected :for={item <- @selected_items} item={item} target={@myself} />

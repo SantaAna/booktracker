@@ -27,7 +27,9 @@ defmodule BookTrackerWeb.NewBookLive do
         id="author-select"
         reset={@form_reset}
         match_function={&Authors.get_author_by_name/2}
-        label="Authors"
+        input_label="Authors"
+        match_label="Matching Authors"
+        selected_label="Added to Book"
       />
       <.button>Save Book</.button>
     </.form>
