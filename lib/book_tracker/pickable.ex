@@ -8,7 +8,7 @@ defimpl BookTracker.Pickable, for: BookTracker.Authors.Author do
   def identifier(author), do: author.id
 end
 
-defimpl BookTracker.Pickable, for: BookTracker.Books.Book do
-  def short_label(book), do: "#{book.title}"
-  def identifier(book), do: book.id
+defimpl BookTracker.Pickable, for: BookTracker.Genres.Genre do
+  def short_label(genre), do: "#{genre.name}"
+  def identifier(genre), do: genre.id
 end
