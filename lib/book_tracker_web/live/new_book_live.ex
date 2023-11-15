@@ -2,6 +2,7 @@ defmodule BookTrackerWeb.NewBookLive do
   use BookTrackerWeb, :live_view
   alias BookTracker.Books
   alias BookTracker.Books.Book
+  alias BookTracker.Authors
   alias BookTrackerWeb.LiveComponents.MatchAndSelect
 
   def mount(_, _, socket) do
@@ -21,7 +22,13 @@ defmodule BookTrackerWeb.NewBookLive do
       <.input type="number" field={@book_form[:page_count]} label="Page Count" />
       <.input type="text" field={@book_form[:isbn10]} label="ISBN-10" />
       <.input type="text" field={@book_form[:isbn13]} label="ISBN-13" />
-      <.live_component module={MatchAndSelect} id="author-select" reset={@form_reset} />
+      <.live_component
+        module={MatchAndSelect}
+        id="author-select"
+        reset={@form_reset}
+        match_function={&Authors.get_author_by_name/2}
+        label="Authors"
+      />
       <.button>Add</.button>
     </.form>
     """
@@ -30,7 +37,7 @@ defmodule BookTrackerWeb.NewBookLive do
   def handle_event("book-submitted", %{"book" => params}, socket) do
     IO.inspect(socket.assigns.selected_authors, label: "selected authors")
 
-    case Books.create_book(params, socket.assigns.selected_authors) do
+    case Books.create_book(params) do
       {:ok, _} ->
         socket
         |> put_flash(:info, "book added")
@@ -40,7 +47,8 @@ defmodule BookTrackerWeb.NewBookLive do
         |> then(&{:noreply, &1})
 
       {:error, cs} ->
-        {:noreply, assign(socket, :book_form, cs)}
+        IO.inspect(cs, label: "cs returned")
+        {:noreply, assign(socket, :book_form, to_form(cs))}
     end
   end
 
