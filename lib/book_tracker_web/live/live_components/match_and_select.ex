@@ -1,6 +1,5 @@
 defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
   use BookTrackerWeb, :live_component
-  alias BookTracker.Authors
 
   @events %{
     "item-selected" => "item has been selected by the user.",
@@ -22,7 +21,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
     <div>
       <.input
         type="text"
-        label={@label}
+       label={@label}
         name="item"
         value=""
         phx-change="update-item"
@@ -46,11 +45,11 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
     ~H"""
     <div
       phx-click="item-selected"
-      phx-value-selected-item-id={@item.id}
+      phx-value-selected-item-id={BookTracker.Pickable.identifier(@item)}
       phx-target={@target}
       class="text-yellow-600"
     >
-      <%= "#{@item.first_name} #{@item.last_name}" %>
+      <%= BookTracker.Pickable.short_label(@item) %>
     </div>
     """
   end
@@ -62,11 +61,11 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
     ~H"""
     <div
       phx-click="item-removed"
-      phx-value-selected-item-id={@item.id}
+      phx-value-selected-item-id={BookTracker.Pickable.identifier(@item)}
       phx-target={@target}
       class="text-green-400"
     >
-      <%= "#{@item.first_name} #{@item.last_name}" %>
+      <%= BookTracker.Pickable.short_label(@item) %>
     </div>
     """
   end
