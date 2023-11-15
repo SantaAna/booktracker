@@ -21,18 +21,30 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
     <div>
       <.input
         type="text"
-       label={@label}
+        label={@label}
         name="item"
         value=""
         phx-change="update-item"
         phx-debounce="500"
         phx-target={@myself}
       />
-      <div class="flex flex-row">
-        <.item_match :for={item <- @item_matches} item={item} target={@myself} />
-      </div>
-      <div class="flex flex-row">
-        <.item_selected :for={item <- @selected_items} item={item} target={@myself} />
+      <div class="mt-3 mb-3 bg-gray-200 p-2">
+        <h3>Matches</h3>
+        <div class="flex flex-row h-12 gap-1">
+          <%= if length(@item_matches) > 0 do %>
+            <.item_match :for={item <- @item_matches} item={item} target={@myself} />
+          <% else %>
+            <p class="p-2 text-xs text-slate-500">None</p>
+          <% end %>
+        </div>
+        <h3>Added to Book</h3>
+        <div class="flex flex-row h-12 gap-1 mt-1">
+          <%= if length(@selected_items) > 0 do %>
+            <.item_selected :for={item <- @selected_items} item={item} target={@myself} />
+          <% else %>
+            <p class="p-2 text-xs text-slate-500">None</p>
+          <% end %>
+        </div>
       </div>
     </div>
     """
@@ -47,7 +59,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
       phx-click="item-selected"
       phx-value-selected-item-id={BookTracker.Pickable.identifier(@item)}
       phx-target={@target}
-      class="text-yellow-600"
+      class="bg-yellow-200 rounded-lg flex flex-row justify-center items-center p-2 text-xs hover:bg-green-200"
     >
       <%= BookTracker.Pickable.short_label(@item) %>
     </div>
@@ -63,7 +75,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
       phx-click="item-removed"
       phx-value-selected-item-id={BookTracker.Pickable.identifier(@item)}
       phx-target={@target}
-      class="text-green-400"
+      class="bg-green-200 rounded-lg flex flex-row justify-center items-center p-2 text-xs hover:bg-red-200"
     >
       <%= BookTracker.Pickable.short_label(@item) %>
     </div>

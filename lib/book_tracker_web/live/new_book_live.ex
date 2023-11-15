@@ -29,7 +29,7 @@ defmodule BookTrackerWeb.NewBookLive do
         match_function={&Authors.get_author_by_name/2}
         label="Authors"
       />
-      <.button>Add</.button>
+      <.button>Save Book</.button>
     </.form>
     """
   end
