@@ -13,6 +13,7 @@ import Faker.Person.En
 import Faker.Lorem
 alias BookTracker.Repo
 alias BookTracker.Authors
+alias BookTracker.Genres
 
 1..100
 |> Enum.map(fn _ ->
@@ -23,3 +24,7 @@ alias BookTracker.Authors
   }
 end)
 |> Enum.each(&Authors.create_author/1)
+
+["history", "fiction", "philosophy", "economics"]
+|> Enum.map(& %{name: &1})
+|> Enum.each(&Genres.create_genre/1)
