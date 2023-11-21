@@ -18,11 +18,10 @@ defmodule BookTrackerWeb.NewBookLive do
     <h1 class="mb-4 text-3xl">Add a Book</h1>
     <.form for={@book_form} phx-submit="book-submitted">
       <.input type="text" field={@book_form[:title]} label="Title" />
-      <.input type="text" field={@book_form[:summary]} label="Summary" />
+      <.input type="hidden" field={@book_form[:summary]} id="summary"/>
       <.input type="number" field={@book_form[:page_count]} label="Page Count" />
       <.input type="text" field={@book_form[:isbn10]} label="ISBN-10" />
       <.input type="text" field={@book_form[:isbn13]} label="ISBN-13" />
-      <.input type="text" field={@book_form[:title]} label="Title" />
       <.live_component
         module={MatchAndSelect}
         id="genre-select"
@@ -43,7 +42,10 @@ defmodule BookTrackerWeb.NewBookLive do
         match_label="Matching Authors"
         selected_label="Added to Book"
       />
-      <.button>Save Book</.button>
+      <p class="font-semibold mb-3"> Summary </p>
+      <trix-editor input="summary">
+      </trix-editor>
+      <.button class="mt-3">Save Book</.button>
     </.form>
     """
   end
