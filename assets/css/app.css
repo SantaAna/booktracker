@@ -1,5 +1,14 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+@import "../../node_modules/trix/dist/trix.css";
+
+/* hiding file attach button on trix input form */
+.trix-button--icon-attach{
+    display: none;
+}
+.trix-button-group--file-tools{
+    display: none !important;
+}
 
 /* This file is for your main application CSS */
