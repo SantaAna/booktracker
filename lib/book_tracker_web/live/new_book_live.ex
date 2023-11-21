@@ -6,7 +6,7 @@ defmodule BookTrackerWeb.NewBookLive do
 
   def mount(_, _, socket) do
     socket
-    |> assign(:book_form, to_form(Books.change_book(%Book{})))
+    |> assign_new_book_form()
     |> assign(:form_reset, false)
     |> assign(:selected_authors, [])
     |> assign(:selected_genres, [])
@@ -58,10 +58,7 @@ defmodule BookTrackerWeb.NewBookLive do
       {:ok, _} ->
         socket
         |> put_flash(:info, "book added")
-        |> assign_new_book_form()
-        |> update(:form_reset, &(!&1))
-        |> assign(:selected_authors, [])
-        |> assign(:selected_genres, [])
+        |> push_navigate(to: "/books/new")
         |> then(&{:noreply, &1})
 
       {:error, cs} ->
