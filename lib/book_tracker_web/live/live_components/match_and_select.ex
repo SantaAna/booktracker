@@ -1,6 +1,25 @@
 defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
   use BookTrackerWeb, :live_component
 
+  @moduledoc """
+  # Match and Select
+
+  Manages a text box input for picking related items in a database.  The user is given matches for the string they have entered into the form text input and can click one of those matches to "attach" it to the current object.  Selected items are sent back to the parent liveview using the input_identifier property (see properties below).
+
+  ## Messages
+
+  Parent liveview must handle messages in the form: {:selected_update, input_identifier, selected_value} where input_identifier is specified by the parent and selected_value is a list of items selected by the user.
+
+  ## Properties
+
+        - reset: a property that will change when the form handled by this component should be reset.  The value of this prop does not matter, it just acts as a signal to reset the form. 
+        - match_function: a function for retrieving a matches that takes a string as the first argument and a keyword list of options.
+        - input_label: the label for the text input that will be rendered by this component.
+        - input_identifier: a string that identifies the form rendered by this components and is also used to label messages sent to the parent liveview.
+        - match_label: a string to label the matches retrieved by the match function.
+        - selected_label: a string to label the items selected by the user.
+  """
+
   @events %{
     "item-selected" => "item has been selected by the user.",
     "update-item" => "item text field has changed",
@@ -104,7 +123,8 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
   end
 
   def handle_event("update-item", params, socket) do
-    item_name = extract_item_names(socket, params)  
+    item_name = extract_item_names(socket, params)
+
     display_matches =
       socket.assigns.match_function.(item_name, limit: 3)
       |> Enum.reject(fn match -> match in socket.assigns.selected_items end)
@@ -127,7 +147,11 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
   end
 
   defp notify_parent(socket) do
-    send(self(), {:selected_update, socket.assigns.input_identifier,socket.assigns.selected_items})
+    send(
+      self(),
+      {:selected_update, socket.assigns.input_identifier, socket.assigns.selected_items}
+    )
+
     socket
   end
 
