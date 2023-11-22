@@ -3,6 +3,10 @@ defmodule BookTrackerWeb.NewAuthorLive do
   alias BookTracker.Authors
   alias BookTracker.Authors.Author
 
+  @events %{
+    "author-submitted" => "Triggered when the user submits the new author form."
+  }
+
   def mount(_, _, socket) do
     socket
     |> assign_new_author_form()
@@ -26,6 +30,8 @@ defmodule BookTrackerWeb.NewAuthorLive do
     """
   end
 
+  def get_events(), do: @events
+
   def handle_event("author-submitted", %{"author" => author_params}, socket) do
     case Authors.create_author(author_params) do
       {:ok, _} -> 
@@ -44,4 +50,5 @@ defmodule BookTrackerWeb.NewAuthorLive do
   defp assign_new_author_form(socket) do
     assign(socket, :author_form, to_form(Authors.change_author(%Author{})))
   end
+
 end

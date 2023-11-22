@@ -4,6 +4,10 @@ defmodule BookTrackerWeb.NewBookLive do
   alias BookTracker.{Authors, Books, Genres}
   alias BookTrackerWeb.LiveComponents.MatchAndSelect
 
+  @events %{
+    "book-submitted" => "triggered when a user submits the new book form"
+  }
+
   def mount(_, _, socket) do
     socket
     |> assign_new_book_form()
@@ -49,6 +53,8 @@ defmodule BookTrackerWeb.NewBookLive do
     </.form>
     """
   end
+
+  def get_events(), do: @events
 
   def handle_event("book-submitted", %{"book" => params}, socket) do
     IO.inspect(socket.assigns.selected_authors, label: "selected authors")
