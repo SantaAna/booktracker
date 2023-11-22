@@ -3,5 +3,5 @@
 <p> Authors: <%= Enum.map(@book.authors, & "#{&1.first_name} #{&1.last_name}") |> Enum.join(",")  %> </p>
 <p> Genres: <%= Enum.map(@book.genres, & "#{&1.name}") |> Enum.join(",")  %> </p>
 </div>
-<h2 class="text-2xl">Summary</h2>
+<h2 class="text-2xl mt-3">Summary</h2>
 <%= raw(@book.summary) %>
