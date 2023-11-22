@@ -1,1 +1,7 @@
-<h1> You made it to <%= @book_id %> page </h1>
+<h1 class="text-3xl"><%= @book.title%></h1>
+<div class="flex flex-row justify-between">
+<p> Authors: <%= Enum.map(@book.authors, & "#{&1.first_name} #{&1.last_name}") |> Enum.join(",")  %> </p>
+<p> Genres: <%= Enum.map(@book.genres, & "#{&1.name}") |> Enum.join(",")  %> </p>
+</div>
+<h2 class="text-2xl">Summary</h2>
+<%= raw(@book.summary) %>

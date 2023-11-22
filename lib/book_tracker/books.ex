@@ -40,6 +40,11 @@ defmodule BookTracker.Books do
   def get_book!(id), do: Repo.get!(Book, id)
 
   @doc """
+  As get_book! but will return nil if the record is not found.
+  """
+  def get_book(id, preloads \\ []), do: Repo.get(Book, id) |> Repo.preload(preloads)
+
+  @doc """
   Creates a book.
 
   ## Examples
