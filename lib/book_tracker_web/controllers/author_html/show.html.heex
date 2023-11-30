@@ -1,0 +1,9 @@
+<h1 class="text-2xl mb-5"> <%= "#{@author.first_name} #{@author.last_name}" %> </h1>
+<h2 class="text-xl"> Author Info </h2>
+<hr class="mb-3"/>
+<%= raw(@author.bio_notes) %>
+<h2 class="text-xl mt-3">  Books by this Author </h2>
+<hr class="mb-3"/>
+<div class="flex flex-col gap-3">
+<BookComponents.book_card :for={book <- @author.books} book={book}/>
+</div>
