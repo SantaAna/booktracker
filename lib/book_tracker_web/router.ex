@@ -19,10 +19,11 @@ defmodule BookTrackerWeb.Router do
 
     get "/", PageController, :home
 
-    live "books/new", NewBookLive
+    live "/books/new", NewBookLive
     get "/books/:book_id", BookController, :show
 
-    live "authors/new", NewAuthorLive
+    live "/authors/new", NewAuthorLive
+    get "/authors/:author_id", AuthorController, :show
   end
 
   # Other scopes may use custom stacks.

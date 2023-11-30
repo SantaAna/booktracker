@@ -86,6 +86,8 @@ defmodule BookTrackerWeb do
       # Core UI components and translation
       import BookTrackerWeb.CoreComponents
       import BookTrackerWeb.Gettext
+      # My custom compnents for this application
+      alias BookTrackerWeb.BookComponents
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

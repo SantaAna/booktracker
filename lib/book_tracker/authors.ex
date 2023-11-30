@@ -36,6 +36,15 @@ defmodule BookTracker.Authors do
 
   """
   def get_author!(id), do: Repo.get!(Author, id)
+  
+  @doc """
+  Like get_author! but will return nill if the author is not found.
+  Excepts a list of relations to preload, defaults to none
+  """
+  def get_author(id, preloads \\ []) do
+    Repo.get(Author, id)
+    |> Repo.preload(preloads)
+  end
 
   @doc """
   Creates a author.
