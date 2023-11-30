@@ -22,6 +22,8 @@ defmodule BookTrackerWeb.Router do
     live "/books/new", NewBookLive
     get "/books/:book_id", BookController, :show
 
+    live "/genres/new", NewGenreLive
+
     live "/authors/new", NewAuthorLive
     get "/authors/:author_id", AuthorController, :show
   end

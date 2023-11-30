@@ -7,5 +7,8 @@ defmodule BookTracker.Repo.Migrations.CreateGenres do
 
       timestamps(type: :utc_datetime)
     end
+
+    create unique_index("genres", [:name])
   end
+
 end
