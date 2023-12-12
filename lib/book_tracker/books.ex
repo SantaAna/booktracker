@@ -23,6 +23,11 @@ defmodule BookTracker.Books do
     Repo.all(Book)
   end
 
+  def list_books(preloads) when is_list(preloads) do
+    Repo.all(Book)
+    |> Repo.preload(preloads)
+  end
+
   @doc """
   Gets a single book.
 
@@ -138,5 +143,44 @@ defmodule BookTracker.Books do
   """
   def change_book_authors(%Book{} = book, attrs \\ %{}, authors \\ []) do
     Book.changeset_with_authors(book, attrs, authors)
+  end
+
+  @doc """
+  Lists all books on the given page number when given the page size.
+  """
+  def get_books_on_page(page_number, page_size, preloads \\ [])
+      when is_integer(page_number) and is_integer(page_size) do
+    from(b in Book)
+    |> limit_books(page_size)
+    |> offset_books(calculate_offset(page_size, page_number))
+    |> Repo.all()
+    |> Repo.preload(preloads)
+  end
+
+
+  defp calculate_offset(page_size, page_number) do
+    (page_number - 1) * page_size
+  end
+
+  def limit_books(q, limit) when is_integer(limit) do
+    from b in q,
+      limit: ^limit
+  end
+
+  def offset_books(q, offset) when is_integer(offset) do
+    from b in q,
+      offset: ^offset
+  end
+
+  def maximum_page_count(page_size) do
+    record_count = Repo.aggregate(Book, :count)
+
+    case rem(record_count, page_size) do
+      0 ->
+        div(record_count, page_size)
+
+      _ ->
+        div(record_count, page_size) + 1
+    end
   end
 end
