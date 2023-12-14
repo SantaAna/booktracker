@@ -5,7 +5,8 @@ defmodule BookTrackerWeb.BooksListLive do
   @default_params %{
     "page-size" => "5",
     "page" => "1",
-    "author-name" => ""
+    "author-name" => "",
+    "genres" => ""
   }
 
   def mount(_, _, socket) do
@@ -16,13 +17,15 @@ defmodule BookTrackerWeb.BooksListLive do
     params = Map.merge(@default_params, params)
 
     [first_name, last_name] = extract_first_and_last(params["author-name"])
+    genres = extract_genres(params["genres"])
 
     {maximum_pages, books} =
       Books.search(
         current_page: String.to_integer(params["page"]),
         page_size: String.to_integer(params["page-size"]),
         author_first_name: first_name,
-        author_last_name: last_name
+        author_last_name: last_name,
+        genres: genres
       )
 
     socket
@@ -31,6 +34,7 @@ defmodule BookTrackerWeb.BooksListLive do
     |> assign(:page_size, String.to_integer(params["page-size"]))
     |> assign(:page, String.to_integer(params["page"]))
     |> assign(:max_page, maximum_pages)
+    |> assign(:genres, params["genres"])
     |> then(&{:noreply, &1})
   end
 
@@ -47,6 +51,8 @@ defmodule BookTrackerWeb.BooksListLive do
       />
       <label for="author-name">Author Name</label>
       <input type="text" name="author-name" id="author-name" value={@author_name} />
+      <label for="genres">Genres</label>
+      <input type="text" name="genres" id="genres" value={@genres} />
       <.button>Submit</.button>
     </form>
     <table class="w-full">
@@ -77,14 +83,14 @@ defmodule BookTrackerWeb.BooksListLive do
     <div class="flex flex-row justify-center pt-3 divide-x-4 divide-white ">
       <div :if={@page > 1} class="rounded-l-lg text-left p-2 bg-gray-100">
         <.link patch={
-          ~p"/books?#{%{"page" => @page - 1, "page-size" => @page_size, "author-name" => @author_name}}"
+          ~p"/books?#{%{"page" => @page - 1, "page-size" => @page_size, "author-name" => @author_name, "genres" => @genres}}"
         }>
           Prev
         </.link>
       </div>
       <div :if={@page < @max_page} class="rounded-r-lg p-2 text-right bg-gray-100">
         <.link patch={
-          ~p"/books?#{%{"page" => @page + 1, "page-size" => @page_size, "author-name" => @author_name}}"
+          ~p"/books?#{%{"page" => @page + 1, "page-size" => @page_size, "author-name" => @author_name, "genres" => @genres}}"
         }>
           Next
         </.link>
@@ -108,6 +114,11 @@ defmodule BookTrackerWeb.BooksListLive do
       _ ->
         [nil, nil]
     end
+  end
+
+  defp extract_genres(genre_string) when is_binary(genre_string) do
+    String.split(genre_string, ",", trim: true)
+    |> then(& if &1 == [], do: nil, else: &1)
   end
 
   defp authors_to_names(authors) do
