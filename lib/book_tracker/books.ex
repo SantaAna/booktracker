@@ -146,34 +146,92 @@ defmodule BookTracker.Books do
   end
 
   @doc """
-  Lists all books on the given page number when given the page size.
+  Searches through the books table with the given options, returns a tuple where the first element is the number of pages of results and the second is the list of matching book structs.
+
+  ## Options
+  - `:page_size` - the number of results that will be returned, defaults to 5
+  - `:current_page` - the page of results that should be returned, defaults to 1
+  - `:author_first_name` - the first name of the author, will be searched using postgres like. Defaults to nil in which case no first name filtering is performed.
+  - `:author_last_name` - the last name of the author, will be searched using postgres like. Defaults to nil in which case no last name filtering is performed.
   """
-  def get_books_on_page(page_number, page_size, preloads \\ [])
-      when is_integer(page_number) and is_integer(page_size) do
-    from(b in Book)
+  def search(options) do
+    defaults = [
+      page_size: 5,
+      current_page: 1,
+      author_first_name: nil,
+      author_last_name: nil
+    ]
+
+    options = Keyword.merge(defaults, options)
+
+    q =
+      from b in Book,
+        preload: [:authors, :genres]
+
+    q
+    |> maybe_join_books_with_authors(options)
+    |> maybe_get_by_first_name(options)
+    |> maybe_get_by_last_name(options)
+    |> distinct(true)
+    |> then(
+      &{maximum_page_count(&1, options[:page_size]),
+       get_books_on_page(&1, options[:current_page], options[:page_size]) |> Repo.all()}
+    )
+  end
+
+  defp maybe_join_books_with_authors(q, options) do
+    if options[:author_first_name] || options[:author_last_name] do
+      join_books_with_authors(q)
+    else
+      q
+    end
+  end
+
+  defp maybe_get_by_first_name(q, options) do
+    if first_name = options[:author_first_name] do
+      get_books_with_author_first_name(q, first_name)
+    else
+      q
+    end
+  end
+
+  defp maybe_get_by_last_name(q, options) do
+    if last_name = options[:author_last_name] do
+      get_books_with_author_last_name(q, last_name)
+    else
+      q
+    end
+  end
+
+  defp join_books_with_authors(q) do
+    from b in q,
+      as: :book,
+      join: ab in "authors_books",
+      on: b.id == ab.book_id,
+      join: a in Author,
+      as: :author,
+      on: a.id == ab.author_id
+  end
+
+  defp get_books_with_author_first_name(q, first_name) do
+    from [author: a] in q,
+      where: like(a.first_name, ^"#{first_name}%")
+  end
+
+  defp get_books_with_author_last_name(q, last_name) do
+    from [author: a] in q,
+      where: like(a.last_name, ^"#{last_name}%")
+  end
+
+  defp get_books_on_page(q, page_number, page_size)
+       when is_integer(page_number) and is_integer(page_size) do
+    from(b in q)
     |> limit_books(page_size)
     |> offset_books(calculate_offset(page_size, page_number))
-    |> Repo.all()
-    |> Repo.preload(preloads)
   end
 
-
-  defp calculate_offset(page_size, page_number) do
-    (page_number - 1) * page_size
-  end
-
-  def limit_books(q, limit) when is_integer(limit) do
-    from b in q,
-      limit: ^limit
-  end
-
-  def offset_books(q, offset) when is_integer(offset) do
-    from b in q,
-      offset: ^offset
-  end
-
-  def maximum_page_count(page_size) do
-    record_count = Repo.aggregate(Book, :count)
+  defp maximum_page_count(q, page_size) do
+    record_count = Repo.aggregate(q, :count)
 
     case rem(record_count, page_size) do
       0 ->
@@ -182,5 +240,19 @@ defmodule BookTracker.Books do
       _ ->
         div(record_count, page_size) + 1
     end
+  end
+
+  defp calculate_offset(page_size, page_number) do
+    (page_number - 1) * page_size
+  end
+
+  defp limit_books(q, limit) when is_integer(limit) do
+    from b in q,
+      limit: ^limit
+  end
+
+  defp offset_books(q, offset) when is_integer(offset) do
+    from b in q,
+      offset: ^offset
   end
 end
