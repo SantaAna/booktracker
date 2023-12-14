@@ -35,6 +35,7 @@ defmodule BookTrackerWeb.BooksListLive do
     |> assign(:page, String.to_integer(params["page"]))
     |> assign(:max_page, maximum_pages)
     |> assign(:genres, params["genres"])
+    |> assign(:params, params)
     |> then(&{:noreply, &1})
   end
 
@@ -82,21 +83,25 @@ defmodule BookTrackerWeb.BooksListLive do
     </table>
     <div class="flex flex-row justify-center pt-3 divide-x-4 divide-white ">
       <div :if={@page > 1} class="rounded-l-lg text-left p-2 bg-gray-100">
-        <.link patch={
-          ~p"/books?#{%{"page" => @page - 1, "page-size" => @page_size, "author-name" => @author_name, "genres" => @genres}}"
-        }>
+        <.link patch={~p"/books?#{decrement_page(@params)}"}>
           Prev
         </.link>
       </div>
       <div :if={@page < @max_page} class="rounded-r-lg p-2 text-right bg-gray-100">
-        <.link patch={
-          ~p"/books?#{%{"page" => @page + 1, "page-size" => @page_size, "author-name" => @author_name, "genres" => @genres}}"
-        }>
+        <.link patch={~p"/books?#{increment_page(@params)}"}>
           Next
         </.link>
       </div>
     </div>
     """
+  end
+
+  defp increment_page(params) when is_map(params) do
+    Map.update!(params, "page", &(String.to_integer(&1) + 1))
+  end
+
+  defp decrement_page(params) when is_map(params) do
+    Map.update!(params, "page", &(String.to_integer(&1) - 1))
   end
 
   def handle_event("search-params-updated", params, socket) do
@@ -118,7 +123,7 @@ defmodule BookTrackerWeb.BooksListLive do
 
   defp extract_genres(genre_string) when is_binary(genre_string) do
     String.split(genre_string, ",", trim: true)
-    |> then(& if &1 == [], do: nil, else: &1)
+    |> then(&if &1 == [], do: nil, else: &1)
   end
 
   defp authors_to_names(authors) do
