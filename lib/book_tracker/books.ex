@@ -8,6 +8,7 @@ defmodule BookTracker.Books do
 
   alias BookTracker.Books.Book
   alias BookTracker.Authors.Author
+  alias BookTracker.Genres.Genre
   alias BookTracker.AuthorsBooks.AuthorBook
 
   @doc """
@@ -159,17 +160,20 @@ defmodule BookTracker.Books do
       page_size: 5,
       current_page: 1,
       author_first_name: nil,
-      author_last_name: nil
+      author_last_name: nil,
+      genres: nil
     ]
 
     options = Keyword.merge(defaults, options)
 
     q =
-      from b in Book,
+      from b in Book, as: :book,
         preload: [:authors, :genres]
 
     q
     |> maybe_join_books_with_authors(options)
+    |> maybe_join_books_with_genres(options)
+    |> maybe_get_by_genres(options)
     |> maybe_get_by_first_name(options)
     |> maybe_get_by_last_name(options)
     |> distinct(true)
@@ -177,6 +181,22 @@ defmodule BookTracker.Books do
       &{maximum_page_count(&1, options[:page_size]),
        get_books_on_page(&1, options[:current_page], options[:page_size]) |> Repo.all()}
     )
+  end
+
+  defp maybe_join_books_with_genres(q, options) do
+    if options[:genres] do
+      join_books_with_genres(q)
+    else
+      q
+    end
+  end
+
+  defp maybe_get_by_genres(q, options) do
+    if genres = options[:genres] do
+      get_books_containing_genre(q, genres)
+    else
+      q
+    end
   end
 
   defp maybe_join_books_with_authors(q, options) do
@@ -205,12 +225,24 @@ defmodule BookTracker.Books do
 
   defp join_books_with_authors(q) do
     from b in q,
-      as: :book,
       join: ab in "authors_books",
       on: b.id == ab.book_id,
       join: a in Author,
       as: :author,
       on: a.id == ab.author_id
+  end
+
+  defp join_books_with_genres(q) do
+    from [book: b] in q,
+      join: bg in "books_genres",
+      on: b.id == bg.book_id,
+      join: g in Genre, as: :genre,
+      on: g.id == bg.genre_id
+  end
+
+  defp get_books_containing_genre(q, genres) when is_list(genres) do
+     from [genre: g] in q,
+      where: g.name in ^genres
   end
 
   defp get_books_with_author_first_name(q, first_name) do
