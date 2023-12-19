@@ -6,7 +6,8 @@ defmodule BookTrackerWeb.BooksListLive do
     "page-size" => "5",
     "page" => "1",
     "author-name" => "",
-    "genres" => ""
+    "genres" => "",
+    "title" => ""
   }
 
   def mount(_, _, socket) do
@@ -15,8 +16,9 @@ defmodule BookTrackerWeb.BooksListLive do
 
   def handle_params(params, _uri, socket) do
     params = Map.merge(@default_params, params)
-
     [first_name, last_name] = extract_first_and_last(params["author-name"])
+    title = if params["title"] == "", do: nil, else: params["title"]
+
     genres = extract_genres(params["genres"])
 
     {maximum_pages, books} =
@@ -25,16 +27,13 @@ defmodule BookTrackerWeb.BooksListLive do
         page_size: String.to_integer(params["page-size"]),
         author_first_name: first_name,
         author_last_name: last_name,
-        genres: genres
+        genres: genres,
+        title: title
       )
 
     socket
     |> assign(:books, books)
-    |> assign(:author_name, params["author-name"])
-    |> assign(:page_size, String.to_integer(params["page-size"]))
-    |> assign(:page, String.to_integer(params["page"]))
     |> assign(:max_page, maximum_pages)
-    |> assign(:genres, params["genres"])
     |> assign(:params, params)
     |> then(&{:noreply, &1})
   end
@@ -42,18 +41,10 @@ defmodule BookTrackerWeb.BooksListLive do
   def render(assigns) do
     ~H"""
     <form phx-submit="search-params-updated">
-      <label for="page-size"> Books Per Page </label>
-      <input
-        type="number"
-        name="page-size"
-        id="page-size"
-        placeholder={@page_size}
-        value={@page_size}
-      />
-      <label for="author-name">Author Name</label>
-      <input type="text" name="author-name" id="author-name" value={@author_name} />
-      <label for="genres">Genres</label>
-      <input type="text" name="genres" id="genres" value={@genres} />
+      <.search_input label="Books Per Page" id="page-size" type="number" value={@params["page-size"]} />
+      <.search_input label="Author Name" id="author-name" type="text" value={@params["author-name"]} />
+      <.search_input label="Genres" id="genres" type="text" value={@params["genres"]} />
+      <.search_input label="Title" id="title" type="text" value={@params["title"]} />
       <.button>Submit</.button>
     </form>
     <table class="w-full">
@@ -82,17 +73,32 @@ defmodule BookTrackerWeb.BooksListLive do
       </tr>
     </table>
     <div class="flex flex-row justify-center pt-3 divide-x-4 divide-white ">
-      <div :if={@page > 1} class="rounded-l-lg text-left p-2 bg-gray-100">
+      <div :if={String.to_integer(@params["page"]) > 1} class="rounded-l-lg text-left p-2 bg-gray-100">
         <.link patch={~p"/books?#{decrement_page(@params)}"}>
           Prev
         </.link>
       </div>
-      <div :if={@page < @max_page} class="rounded-r-lg p-2 text-right bg-gray-100">
+      <div
+        :if={String.to_integer(@params["page"]) < @max_page}
+        class="rounded-r-lg p-2 text-right bg-gray-100"
+      >
         <.link patch={~p"/books?#{increment_page(@params)}"}>
           Next
         </.link>
       </div>
     </div>
+    """
+  end
+
+  attr :label, :string, required: true
+  attr :value, :string, required: true
+  attr :id, :string, required: true
+  attr :type, :string, required: true
+
+  def search_input(assigns) do
+    ~H"""
+    <label for={@id} class="text-sm"><%= @label %></label>
+    <input type={@type} name={@id} id={@id} value={@value} />
     """
   end
 

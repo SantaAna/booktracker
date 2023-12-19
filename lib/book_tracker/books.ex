@@ -161,7 +161,8 @@ defmodule BookTracker.Books do
       current_page: 1,
       author_first_name: nil,
       author_last_name: nil,
-      genres: nil
+      genres: nil,
+      title: nil
     ]
 
     options = Keyword.merge(defaults, options)
@@ -176,12 +177,14 @@ defmodule BookTracker.Books do
     |> maybe_get_by_genres(options)
     |> maybe_get_by_first_name(options)
     |> maybe_get_by_last_name(options)
+    |> maybe_get_by_title(options)
     |> distinct(true)
     |> then(
       &{maximum_page_count(&1, options[:page_size]),
        get_books_on_page(&1, options[:current_page], options[:page_size]) |> Repo.all()}
     )
   end
+
 
   defp maybe_join_books_with_genres(q, options) do
     if options[:genres] do
@@ -191,17 +194,17 @@ defmodule BookTracker.Books do
     end
   end
 
-  defp maybe_get_by_genres(q, options) do
-    if genres = options[:genres] do
-      get_books_containing_genre(q, genres)
+  defp maybe_join_books_with_authors(q, options) do
+    if options[:author_first_name] || options[:author_last_name] do
+      join_books_with_authors(q)
     else
       q
     end
   end
 
-  defp maybe_join_books_with_authors(q, options) do
-    if options[:author_first_name] || options[:author_last_name] do
-      join_books_with_authors(q)
+  defp maybe_get_by_genres(q, options) do
+    if genres = options[:genres] do
+      get_books_containing_genre(q, genres)
     else
       q
     end
@@ -218,6 +221,14 @@ defmodule BookTracker.Books do
   defp maybe_get_by_last_name(q, options) do
     if last_name = options[:author_last_name] do
       get_books_with_author_last_name(q, last_name)
+    else
+      q
+    end
+  end
+
+  defp maybe_get_by_title(q, options) do
+    if title = options[:title] do
+      get_books_with_title(q, title)
     else
       q
     end
@@ -247,12 +258,17 @@ defmodule BookTracker.Books do
 
   defp get_books_with_author_first_name(q, first_name) do
     from [author: a] in q,
-      where: like(a.first_name, ^"#{first_name}%")
+      where: ilike(a.first_name, ^"#{first_name}%")
   end
 
   defp get_books_with_author_last_name(q, last_name) do
     from [author: a] in q,
-      where: like(a.last_name, ^"#{last_name}%")
+      where: ilike(a.last_name, ^"#{last_name}%")
+  end
+
+  defp get_books_with_title(q, title) do
+    from [book: b] in q,
+     where: ilike(b.title, ^"#{title}%")
   end
 
   defp get_books_on_page(q, page_number, page_size)
@@ -275,6 +291,8 @@ defmodule BookTracker.Books do
   end
 
   defp calculate_offset(page_size, page_number) do
+    IO.inspect(page_size, label: "page_size")
+    IO.inspect(page_number, label: "page_number")
     (page_number - 1) * page_size
   end
 
