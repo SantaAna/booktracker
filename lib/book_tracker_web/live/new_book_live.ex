@@ -21,7 +21,7 @@ defmodule BookTrackerWeb.NewBookLive do
     ~H"""
     <h1 class="mb-4 text-3xl">Add a Book</h1>
     <.form for={@book_form} phx-submit="book-submitted">
-      <.input type="text" field={@book_form[:title]} label="Title" />
+      <.input class="input input-md input-bordered"  type="text" field={@book_form[:title]} label="Title" />
       <.input type="hidden" field={@book_form[:summary]} id="summary"/>
       <.input type="number" field={@book_form[:page_count]} label="Page Count" />
       <.input type="text" field={@book_form[:isbn10]} label="ISBN-10" />
@@ -49,7 +49,7 @@ defmodule BookTrackerWeb.NewBookLive do
       <p class="font-semibold mb-3"> Summary </p>
       <trix-editor input="summary">
       </trix-editor>
-      <.button class="mt-3">Save Book</.button>
+      <button class="btn btn-primary mt-2">Save Book</button>
     </.form>
     """
   end

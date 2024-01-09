@@ -65,5 +65,8 @@ module.exports = {
         }
       }, {values})
     })
-  ]
+  ],
+  daisyui: {
+      themes: ["dim", "dark"]
+  }
 }

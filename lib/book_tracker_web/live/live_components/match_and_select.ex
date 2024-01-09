@@ -47,9 +47,9 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
         phx-debounce="500"
         phx-target={@myself}
       />
-      <div class="mt-3 mb-3 bg-gray-200 p-2">
-        <h3><%= @match_label %></h3>
-        <div class="flex flex-row h-12 gap-1">
+      <div class="mt-3 mb-3 bg-neutral p-2">
+        <h3 class="mb-1"><%= @match_label %></h3>
+        <div class="flex flex-row h-12 gap-1 text-primary-content">
           <%= if length(@item_matches) > 0 do %>
             <.item_match :for={item <- @item_matches} item={item} target={@myself} />
           <% else %>
@@ -78,9 +78,12 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
       phx-click="item-selected"
       phx-value-selected-item-id={BookTracker.Pickable.identifier(@item)}
       phx-target={@target}
-      class="bg-yellow-200 rounded-lg flex flex-row justify-center items-center p-2 text-xs hover:bg-green-200"
+      class="badge badge-info badge-lg hover:badge-success"
     >
+      <div class="flex flex-row gap-1 align-middle">
+      <.icon name="hero-plus-circle" class="mt-0.5 text-center"/> 
       <%= BookTracker.Pickable.short_label(@item) %>
+      </div>
     </div>
     """
   end
@@ -94,9 +97,12 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
       phx-click="item-removed"
       phx-value-selected-item-id={BookTracker.Pickable.identifier(@item)}
       phx-target={@target}
-      class="bg-green-200 rounded-lg flex flex-row justify-center items-center p-2 text-xs hover:bg-red-200"
+      class="badge badge-success badge-lg hover:badge-error"
     >
+      <div class="flex flex-row gap-1 align-middle">
+      <.icon name="hero-x-circle" class="mt-0.5 text-center"/> 
       <%= BookTracker.Pickable.short_label(@item) %>
+      </div>
     </div>
     """
   end

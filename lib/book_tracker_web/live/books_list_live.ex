@@ -40,50 +40,64 @@ defmodule BookTrackerWeb.BooksListLive do
 
   def render(assigns) do
     ~H"""
-    <form phx-submit="search-params-updated">
-      <.search_input label="Books Per Page" id="page-size" type="number" value={@params["page-size"]} />
-      <.search_input label="Author Name" id="author-name" type="text" value={@params["author-name"]} />
-      <.search_input label="Genres" id="genres" type="text" value={@params["genres"]} />
-      <.search_input label="Title" id="title" type="text" value={@params["title"]} />
-      <.button>Submit</.button>
-    </form>
-    <table class="w-full">
-      <thead class="border-b-2 border-gray-200 bg-gray-50">
-        <tr>
-          <th
-            :for={header <- ~w(Title Authors Genres Pages)}
-            class="p-3 text-sm font-semibold tracking-wide text-left"
-          >
-            <%= header %>
-          </th>
+    <div class="card shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">Search Criteria</h2>
+        <form phx-submit="search-params-updated">
+          <div class="grid grid-cols-2">
+            <.search_input
+              label="Books Per Page"
+              id="page-size"
+              type="number"
+              value={@params["page-size"]}
+            />
+            <.search_input
+              label="Author Name"
+              id="author-name"
+              type="text"
+              value={@params["author-name"]}
+            />
+            <.search_input label="Genres" id="genres" type="text" value={@params["genres"]} />
+            <.search_input label="Title" id="title" type="text" value={@params["title"]} />
+          </div>
+            <button class="btn btn-primary mt-2">Submit</button>
+        </form>
+      </div>
+    </div>
+    <div class="pt-4">
+      <table class="table table-zebra w-full">
+        <thead>
+          <tr>
+            <th :for={header <- ~w(Title Authors Genres Pages)}>
+              <%= header %>
+            </th>
+          </tr>
+        </thead>
+        <tr :for={book <- @books}>
+          <td>
+            <.link navigate={~p"/books/#{book.id}"} class="link link-primary">
+              <%= book.title %>
+            </.link>
+          </td>
+          <td><%= authors_to_names(book.authors) %></td>
+          <td><%= genres_to_names(book.genres) %></td>
+          <td><%= book.page_count %></td>
         </tr>
-      </thead>
-      <tr :for={book <- @books} class="border-b border-gray-300 even:bg-gray-100">
-        <td class="p-3 text-sm tracking-wide">
-          <.link
-            navigate={~p"/books/#{book.id}"}
-            class="underline underline-offset-2 hover:text-sky-700"
-          >
-            <%= book.title %>
-          </.link>
-        </td>
-        <td class="p-3 text-sm tracking-wide"><%= authors_to_names(book.authors) %></td>
-        <td class="p-3 text-sm tracking-wide"><%= genres_to_names(book.genres) %></td>
-        <td class="p-3 text-sm tracking-wide"><%= book.page_count %></td>
-      </tr>
-    </table>
-    <div class="flex flex-row justify-center pt-3 divide-x-4 divide-white ">
-      <div :if={String.to_integer(@params["page"]) > 1} class="rounded-l-lg text-left p-2 bg-gray-100">
+      </table>
+    </div>
+    <div class="flex flex-row justify-center gap-1 pt-3">
+      <div :if={String.to_integer(@params["page"]) > 1}>
         <.link patch={~p"/books?#{decrement_page(@params)}"}>
-          Prev
+          <div class="btn rounded-r-none">
+            <.icon name="hero-arrow-left-solid" class="h-4 w-4" /> Prev
+          </div>
         </.link>
       </div>
-      <div
-        :if={String.to_integer(@params["page"]) < @max_page}
-        class="rounded-r-lg p-2 text-right bg-gray-100"
-      >
+      <div :if={String.to_integer(@params["page"]) < @max_page}>
         <.link patch={~p"/books?#{increment_page(@params)}"}>
-          Next
+          <div class="btn rounded-l-none">
+           Next <.icon name="hero-arrow-right-solid" class="h-4 w-4" /> 
+          </div>
         </.link>
       </div>
     </div>
@@ -97,8 +111,10 @@ defmodule BookTrackerWeb.BooksListLive do
 
   def search_input(assigns) do
     ~H"""
-    <label for={@id} class="text-sm"><%= @label %></label>
-    <input type={@type} name={@id} id={@id} value={@value} />
+    <div>
+      <label for={@id} class="label label-text"><%= @label %></label>
+      <input class="input input-md input-bordered" type={@type} name={@id} id={@id} value={@value} />
+    </div>
     """
   end
 
