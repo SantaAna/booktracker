@@ -10,14 +10,13 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
 
   Parent liveview must handle messages in the form: {:selected_update, input_identifier, selected_value} where input_identifier is specified by the parent and selected_value is a list of items selected by the user.
 
-  ## Properties
-
-        - reset: a property that will change when the form handled by this component should be reset.  The value of this prop does not matter, it just acts as a signal to reset the form. 
+  ## Properties - reset: a property that will change when the form handled by this component should be reset.  The value of this prop does not matter, it just acts as a signal to reset the form. 
         - match_function: a function for retrieving a matches that takes a string as the first argument and a keyword list of options.
         - input_label: the label for the text input that will be rendered by this component.
         - input_identifier: a string that identifies the form rendered by this components and is also used to label messages sent to the parent liveview.
         - match_label: a string to label the matches retrieved by the match function.
         - selected_label: a string to label the items selected by the user.
+        - form_field: the corresponding form field that is being handled by match and select.  This is required for form errors to be displayed.
   """
 
   @events %{
@@ -43,6 +42,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
         label={@input_label}
         name={@input_identifier}
         value=""
+        field={@form_field}
         phx-change="update-item"
         phx-debounce="500"
         phx-target={@myself}

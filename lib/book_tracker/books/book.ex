@@ -20,7 +20,7 @@ defmodule BookTracker.Books.Book do
   def changeset(book, attrs) do
     book
     |> cast(attrs, [:title, :page_count, :summary, :isbn10, :isbn13])
-    |> validate_required([:title, :page_count, :summary, :isbn10, :isbn13])
+    |> validate_required([:title])
   end
 
   @doc """
@@ -34,6 +34,8 @@ defmodule BookTracker.Books.Book do
       changeset(book, attrs)
       |> put_assoc(:genres, genres)
       |> put_assoc(:authors, authors)
+      |> validate_non_empty_association(:authors)
+      |> validate_non_empty_association(:genres)
     else
       raise(ArgumentError, "the last two arguments must be a list of author structs and genre structs respectively.")
     end
@@ -52,6 +54,16 @@ defmodule BookTracker.Books.Book do
     else
       raise("You must provide a list of author structs as the last argument!")
     end
+  end
+
+  defp validate_non_empty_association(changeset, assoc_name) when is_atom(assoc_name) do
+    validate_change(changeset, assoc_name, fn _field, value -> 
+      if value == [] or value == nil do
+        [{assoc_name, "you must chose at least one"}]
+      else
+        []
+      end
+    end)
   end
 
   defp all_author_structs?(authors) when is_list(authors) do
