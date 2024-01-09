@@ -34,7 +34,7 @@ defmodule BookTrackerWeb.NewBookLive do
       <.input type="number" field={@book_form[:page_count]} label="Page Count" />
       <.input type="text" field={@book_form[:isbn10]} label="ISBN-10" />
       <.input type="text" field={@book_form[:isbn13]} label="ISBN-13" />
-      <div class="flex flex-row">
+      <div class="relative">
         <.live_component
           module={MatchAndSelect}
           id="genre-select"
@@ -47,14 +47,14 @@ defmodule BookTrackerWeb.NewBookLive do
           form_field={@book_form[:genres]}
         />
         <label
-          class="btn btn-md btn-success ml-1 mt-9"
+          class="btn btn-md btn-success ml-1 mt-9 absolute top-0 left-52"
           for="new-genre-modal"
           id="new-genre-modal-label"
         >
           <.icon name="hero-plus" />
         </label>
       </div>
-      <div class="flex flex-row">
+      <div class="relative">
         <.live_component
           module={MatchAndSelect}
           id="author-select"
@@ -67,7 +67,7 @@ defmodule BookTrackerWeb.NewBookLive do
           form_field={@book_form[:genres]}
         />
         <label
-          class="btn btn-md btn-success ml-1 mt-9"
+          class="btn btn-md btn-success ml-1 mt-9 absolute top-0 left-52"
           for="new-author-modal"
           id="new-author-modal-label"
         >
@@ -79,13 +79,13 @@ defmodule BookTrackerWeb.NewBookLive do
       <trix-editor input="summary"></trix-editor>
       <button class="btn btn-primary mt-2">Save Book</button>
     </.form>
-    <.add_new_modal id="new-genre-modal">
+    <.add_new_modal id="new-genre-modal" title="Add Genre">
       <.form for={@genre_form} phx-submit="genre-submitted">
         <.input field={@genre_form[:name]} type="text" label="Genre Name" />
         <button class="btn btn-primary mt-2">Create Genre</button>
       </.form>
     </.add_new_modal>
-    <.add_new_modal id="new-author-modal">
+    <.add_new_modal id="new-author-modal" title="Add Author">
       <.form for={@author_form} phx-submit="author-submitted">
         <.input field={@author_form[:first_name]} type="text" label="First Name" />
         <.input field={@author_form[:last_name]} type="text" label="Last Name" />
@@ -103,16 +103,27 @@ defmodule BookTrackerWeb.NewBookLive do
   """
   attr :id, :string, required: true
   slot :inner_block, required: true
+  attr :title, :string, default: nil
 
   def add_new_modal(assigns) do
     ~H"""
     <input type="checkbox" id={@id} class="modal-toggle" />
     <div class="modal" role="dialog">
       <div class="modal-box">
-        <%= render_slot(@inner_block) %>
-        <div class="modal-action">
-          <label for={@id} class="btn">Close!</label>
+        <div class="flex flex-row justify-end">
+          <div class="modal-action mb-5">
+            <label
+              for={@id}
+              class="bg-error text-error-content text-lg cursor-pointer rounded-full p-1 hover:bg-red-800"
+            >
+              &#x1F7AE Close
+            </label>
+          </div>
         </div>
+        <h3 :if={@title} class="text-xl mb-3">
+          <%= @title %>
+        </h3>
+        <%= render_slot(@inner_block) %>
       </div>
     </div>
     """
