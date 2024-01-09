@@ -1,6 +1,8 @@
 defmodule BookTrackerWeb.NewBookLive do
   use BookTrackerWeb, :live_view
   alias BookTracker.Books.Book
+  alias BookTracker.Authors.Author
+  alias BookTracker.Genres.Genre
   alias BookTracker.{Authors, Books, Genres}
   alias BookTrackerWeb.LiveComponents.MatchAndSelect
 
@@ -11,6 +13,8 @@ defmodule BookTrackerWeb.NewBookLive do
   def mount(_, _, socket) do
     socket
     |> assign_new_book_form()
+    |> assign_new_genre_form()
+    |> assign_new_author_form()
     |> assign(:form_reset, false)
     |> assign(:selected_authors, [])
     |> assign(:selected_genres, [])
@@ -30,42 +34,125 @@ defmodule BookTrackerWeb.NewBookLive do
       <.input type="number" field={@book_form[:page_count]} label="Page Count" />
       <.input type="text" field={@book_form[:isbn10]} label="ISBN-10" />
       <.input type="text" field={@book_form[:isbn13]} label="ISBN-13" />
-      <.live_component
-        module={MatchAndSelect}
-        id="genre-select"
-        reset={@form_reset}
-        match_function={&Genres.get_genre_by_name/2}
-        input_label="Genres"
-        input_identifier="genres"
-        match_label="Matching Genres"
-        selected_label="Added to Book"
-        form_field={@book_form[:genres]}
-      />
-      <.live_component
-        module={MatchAndSelect}
-        id="author-select"
-        reset={@form_reset}
-        match_function={&Authors.get_author_by_name/2}
-        input_label="Authors"
-        input_identifier="authors"
-        match_label="Matching Authors"
-        selected_label="Added to Book"
-        form_field={@book_form[:genres]}
-      />
+      <div class="flex flex-row">
+        <.live_component
+          module={MatchAndSelect}
+          id="genre-select"
+          reset={@form_reset}
+          match_function={&Genres.get_genre_by_name/2}
+          input_label="Genres"
+          input_identifier="genres"
+          match_label="Matching Genres"
+          selected_label="Added to Book"
+          form_field={@book_form[:genres]}
+        />
+        <label
+          class="btn btn-md btn-success ml-1 mt-9"
+          for="new-genre-modal"
+          id="new-genre-modal-label"
+        >
+          <.icon name="hero-plus" />
+        </label>
+      </div>
+      <div class="flex flex-row">
+        <.live_component
+          module={MatchAndSelect}
+          id="author-select"
+          reset={@form_reset}
+          match_function={&Authors.get_author_by_name/2}
+          input_label="Authors"
+          input_identifier="authors"
+          match_label="Matching Authors"
+          selected_label="Added to Book"
+          form_field={@book_form[:genres]}
+        />
+        <label
+          class="btn btn-md btn-success ml-1 mt-9"
+          for="new-author-modal"
+          id="new-author-modal-label"
+        >
+          <.icon name="hero-plus" />
+        </label>
+      </div>
       <.input type="hidden" field={@book_form[:summary]} id="summary" />
       <p class="font-semibold mb-3">Summary</p>
       <trix-editor input="summary"></trix-editor>
       <button class="btn btn-primary mt-2">Save Book</button>
     </.form>
+    <.add_new_modal id="new-genre-modal">
+      <.form for={@genre_form} phx-submit="genre-submitted">
+        <.input field={@genre_form[:name]} type="text" label="Genre Name" />
+        <button class="btn btn-primary mt-2">Create Genre</button>
+      </.form>
+    </.add_new_modal>
+    <.add_new_modal id="new-author-modal">
+      <.form for={@author_form} phx-submit="author-submitted">
+        <.input field={@author_form[:first_name]} type="text" label="First Name" />
+        <.input field={@author_form[:last_name]} type="text" label="Last Name" />
+        <.input field={@author_form[:bio_notes]} type="textarea" label="Biography Note" />
+        <button class="btn btn-primary mt-2">Create Author</button>
+      </.form>
+    </.add_new_modal>
+    """
+  end
+
+  @doc """
+  Renders a modal that is used to enter info for a new item.
+
+  The inner block should be a form.
+  """
+  attr :id, :string, required: true
+  slot :inner_block, required: true
+
+  def add_new_modal(assigns) do
+    ~H"""
+    <input type="checkbox" id={@id} class="modal-toggle" />
+    <div class="modal" role="dialog">
+      <div class="modal-box">
+        <%= render_slot(@inner_block) %>
+        <div class="modal-action">
+          <label for={@id} class="btn">Close!</label>
+        </div>
+      </div>
+    </div>
     """
   end
 
   def get_events(), do: @events
 
-  def handle_event("book-submitted", %{"book" => params}, socket) do
-    IO.inspect(socket.assigns.selected_authors, label: "selected authors")
-    IO.inspect(socket.assigns.selected_genres, label: "selected genres")
+  def handle_event("genre-submitted", %{"genre" => params}, socket) do
+    case Genres.create_genre(params) do
+      {:ok, _} ->
+        socket
+        |> put_flash(:info, "genre added")
+        |> assign_new_genre_form()
+        |> then(&{:noreply, &1})
 
+      {:error, cs} ->
+        socket
+        |> put_flash(:error, translate_errors(cs))
+        |> assign_new_genre_form()
+        |> then(&{:noreply, &1})
+    end
+  end
+
+  def handle_event("author-submitted", %{"author" => params}, socket) do
+    case Authors.create_author(params) do
+      {:ok, _} ->
+        socket
+        |> put_flash(:info, "author added")
+        |> assign_new_author_form()
+        |> then(&{:noreply, &1})
+
+      {:error, cs} ->
+        socket
+        |> put_flash(:error, translate_errors(cs))
+        |> assign_new_author_form()
+        |> then(&{:noreply, &1})
+    end
+  end
+
+  def handle_event("book-submitted", %{"book" => params}, socket) do
     case Books.create_book(
            params,
            socket.assigns.selected_authors,
@@ -94,5 +181,20 @@ defmodule BookTrackerWeb.NewBookLive do
 
   defp assign_new_book_form(socket) do
     assign(socket, :book_form, to_form(Books.change_book_authors(%Book{})))
+  end
+
+  defp assign_new_author_form(socket) do
+    assign(socket, :author_form, to_form(Authors.change_author(%Author{})))
+  end
+
+  defp assign_new_genre_form(socket) do
+    assign(socket, :genre_form, to_form(Genres.change_genre(%Genre{})))
+  end
+
+  defp translate_errors(cs) do
+    Enum.map(Keyword.keys(cs.errors), fn error ->
+      "#{error}: #{elem(cs.errors[error], 0)}"
+    end)
+    |> Enum.join("\n")
   end
 end
