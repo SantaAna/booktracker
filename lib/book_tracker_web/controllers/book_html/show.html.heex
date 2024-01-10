@@ -4,4 +4,4 @@
 <p> Genres: <%= Enum.map(@book.genres, & "#{&1.name}") |> Enum.join(",")  %> </p>
 </div>
 <h2 class="text-2xl mt-3">Summary</h2>
-<%= raw(@book.summary) %>
+<%= raw(Markdown.transform_markdown(@book.md_summary) || "No Summary") %>

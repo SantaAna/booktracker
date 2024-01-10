@@ -78,7 +78,7 @@ defmodule BookTrackerWeb.NewBookLive do
       </div>
       <p class="font-semibold">Summary</p>
       <p class="text-sm mb-3">accepts markdown input</p>
-      <.input type="textarea" field={@book_form[:summary]} />
+      <.input type="textarea" field={@book_form[:md_summary]} />
       <button class="btn btn-primary mt-2">Save Book</button>
     </.form>
     <.add_new_modal id="new-genre-modal" title="Add Genre">
@@ -91,7 +91,7 @@ defmodule BookTrackerWeb.NewBookLive do
       <.form for={@author_form} phx-submit="author-submitted">
         <.input field={@author_form[:first_name]} type="text" label="First Name" />
         <.input field={@author_form[:last_name]} type="text" label="Last Name" />
-        <.input field={@author_form[:bio_notes]} type="textarea" label="Biography Note" />
+        <.input field={@author_form[:md_bio_notes]} type="textarea" label="Biography Note" />
         <button class="btn btn-primary mt-2">Create Author</button>
       </.form>
     </.add_new_modal>
@@ -192,8 +192,6 @@ defmodule BookTrackerWeb.NewBookLive do
   end
 
   def handle_event("author-submitted", %{"author" => params}, socket) do
-    params = Map.update!(params, "bio_notes", &Markdown.transform_markdown/1)
-
     case Authors.create_author(params) do
       {:ok, _} ->
         socket
@@ -210,9 +208,7 @@ defmodule BookTrackerWeb.NewBookLive do
   end
 
   def handle_event("book-submitted", %{"book" => params}, socket) do
-    params = Map.update!(params, "summary", &Markdown.transform_markdown/1)
-    IO.inspect(params, label: "params passed to book")
-
+    IO.inspect(params, label: "new book params")
     case Books.create_book(
            params,
            socket.assigns.selected_authors,

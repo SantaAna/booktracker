@@ -8,6 +8,7 @@ defmodule BookTracker.Books.Book do
     field :title, :string
     field :page_count, :integer
     field :summary, :string
+    field :md_summary, :string
     field :isbn10, :string
     field :isbn13, :string
     field :rating, :integer
@@ -21,7 +22,7 @@ defmodule BookTracker.Books.Book do
   @doc false
   def changeset(book, attrs) do
     book
-    |> cast(attrs, [:title, :page_count, :summary, :isbn10, :isbn13, :rating, :last_read])
+    |> cast(attrs, [:title, :page_count, :summary, :md_summary, :isbn10, :isbn13, :rating, :last_read])
     |> validate_required([:title])
   end
 

@@ -10,9 +10,11 @@ defmodule BookTrackerWeb.Markdown do
 
   Uses the processors returned by post_registered_processors
   """
-  def transform_markdown(markdown_text) do
+  def transform_markdown(markdown_text) when is_binary(markdown_text) do
     Earmark.as_html!(markdown_text, registered_processors: post_registered_processors())
   end
+
+  def transform_markdown(_), do: nil
 
   @doc """
   Adds styling to HTML tags used in markdown.
