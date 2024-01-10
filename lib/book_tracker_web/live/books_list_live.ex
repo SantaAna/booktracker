@@ -60,7 +60,7 @@ defmodule BookTrackerWeb.BooksListLive do
             <.search_input label="Genres" id="genres" type="text" value={@params["genres"]} />
             <.search_input label="Title" id="title" type="text" value={@params["title"]} />
           </div>
-            <button class="btn btn-primary mt-2">Submit</button>
+          <button class="btn btn-primary mt-2">Submit</button>
         </form>
       </div>
     </div>
@@ -79,7 +79,7 @@ defmodule BookTrackerWeb.BooksListLive do
               <%= book.title %>
             </.link>
           </td>
-          <td><%= authors_to_names(book.authors) %></td>
+          <td><.authors_to_links authors={book.authors} /></td>
           <td><%= genres_to_names(book.genres) %></td>
           <td><%= book.page_count %></td>
         </tr>
@@ -96,7 +96,7 @@ defmodule BookTrackerWeb.BooksListLive do
       <div :if={String.to_integer(@params["page"]) < @max_page}>
         <.link patch={~p"/books?#{increment_page(@params)}"}>
           <div class="btn rounded-l-none">
-           Next <.icon name="hero-arrow-right-solid" class="h-4 w-4" /> 
+            Next <.icon name="hero-arrow-right-solid" class="h-4 w-4" />
           </div>
         </.link>
       </div>
@@ -146,6 +146,16 @@ defmodule BookTrackerWeb.BooksListLive do
   defp extract_genres(genre_string) when is_binary(genre_string) do
     String.split(genre_string, ",", trim: true)
     |> then(&if &1 == [], do: nil, else: &1)
+  end
+
+  def authors_to_links(assigns) do
+    ~H"""
+    <div class="flex flex-row gap-1">
+      <.link :for={author <- @authors} navigate={~p"/authors/#{author.id}"} class="link link-primary">
+        <%= author.first_name %> <%= author.last_name %>
+      </.link>
+    </div>
+    """
   end
 
   defp authors_to_names(authors) do
