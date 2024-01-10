@@ -74,9 +74,9 @@ defmodule BookTrackerWeb.NewBookLive do
           <.icon name="hero-plus" />
         </label>
       </div>
-      <.input type="hidden" field={@book_form[:summary]} id="summary" />
-      <p class="font-semibold mb-3">Summary</p>
-      <trix-editor input="summary"></trix-editor>
+      <p class="font-semibold">Summary</p>
+      <p class="text-sm mb-3">accepts markdown input</p>
+      <.input type="textarea" field={@book_form[:summary]}/>
       <button class="btn btn-primary mt-2">Save Book</button>
     </.form>
     <.add_new_modal id="new-genre-modal" title="Add Genre">
@@ -148,6 +148,7 @@ defmodule BookTrackerWeb.NewBookLive do
   end
 
   def handle_event("author-submitted", %{"author" => params}, socket) do
+    params = Map.update!(params, "bio_notes", &Markdown.transform_markdown/1)
     case Authors.create_author(params) do
       {:ok, _} ->
         socket
@@ -164,6 +165,7 @@ defmodule BookTrackerWeb.NewBookLive do
   end
 
   def handle_event("book-submitted", %{"book" => params}, socket) do
+    params = Map.update!(params, "summary", &Markdown.transform_markdown/1)
     case Books.create_book(
            params,
            socket.assigns.selected_authors,
@@ -183,8 +185,7 @@ defmodule BookTrackerWeb.NewBookLive do
   end
 
   def handle_info({:selected_update, "authors", selected_list}, socket) do
-    {:noreply, assign(socket, :selected_authors, selected_list)}
-  end
+    {:noreply, assign(socket, :selected_authors, selected_list)} end
 
   def handle_info({:selected_update, "genres", selected_list}, socket) do
     {:noreply, assign(socket, :selected_genres, selected_list)}

@@ -88,6 +88,8 @@ defmodule BookTrackerWeb do
       import BookTrackerWeb.Gettext
       # My custom compnents for this application
       alias BookTrackerWeb.BookComponents
+      # Converting markdown to HTML
+      alias BookTrackerWeb.Markdown
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

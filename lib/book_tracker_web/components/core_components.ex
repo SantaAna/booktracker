@@ -353,10 +353,7 @@ defmodule BookTrackerWeb.CoreComponents do
         id={@id}
         name={@name}
         class={[
-          "input input-lg input-bordered",
-          "min-h-[6rem] phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400",
-          @errors == [] && "border-zinc-300 focus:border-zinc-400",
-          @errors != [] && "border-rose-400 focus:border-rose-400"
+          "textarea textarea-lg textarea-bordered w-full",
         ]}
         {@rest}
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
