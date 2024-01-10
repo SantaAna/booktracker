@@ -158,12 +158,6 @@ defmodule BookTrackerWeb.BooksListLive do
     """
   end
 
-  defp authors_to_names(authors) do
-    authors
-    |> Enum.map(&"#{&1.first_name} #{&1.last_name}")
-    |> Enum.join(", ")
-  end
-
   defp genres_to_names(genres) do
     genres
     |> Enum.map(& &1.name)
