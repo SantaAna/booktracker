@@ -45,12 +45,7 @@ defmodule BookTrackerWeb.BooksListLive do
         <h2 class="card-title">Search Criteria</h2>
         <form phx-submit="search-params-updated">
           <div class="grid grid-cols-2">
-            <.search_input
-              label="Books Per Page"
-              id="page-size"
-              type="number"
-              value={@params["page-size"]}
-            />
+            <.search_input label="Title" id="title" type="text" value={@params["title"]} />
             <.search_input
               label="Author Name"
               id="author-name"
@@ -58,7 +53,12 @@ defmodule BookTrackerWeb.BooksListLive do
               value={@params["author-name"]}
             />
             <.search_input label="Genres" id="genres" type="text" value={@params["genres"]} />
-            <.search_input label="Title" id="title" type="text" value={@params["title"]} />
+            <.search_input
+              label="Books Per Page"
+              id="page-size"
+              type="number"
+              value={@params["page-size"]}
+            />
           </div>
           <button class="btn btn-primary mt-2">Submit</button>
         </form>
