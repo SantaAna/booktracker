@@ -10,6 +10,8 @@ defmodule BookTracker.Books.Book do
     field :summary, :string
     field :isbn10, :string
     field :isbn13, :string
+    field :rating, :integer
+    field :last_read, :date
     many_to_many :authors, BookTracker.Authors.Author, join_through: "authors_books"
     many_to_many :genres, BookTracker.Genres.Genre, join_through: "books_genres"
 
@@ -19,7 +21,7 @@ defmodule BookTracker.Books.Book do
   @doc false
   def changeset(book, attrs) do
     book
-    |> cast(attrs, [:title, :page_count, :summary, :isbn10, :isbn13])
+    |> cast(attrs, [:title, :page_count, :summary, :isbn10, :isbn13, :rating, :last_read])
     |> validate_required([:title])
   end
 
@@ -37,7 +39,10 @@ defmodule BookTracker.Books.Book do
       |> validate_non_empty_association(:authors)
       |> validate_non_empty_association(:genres)
     else
-      raise(ArgumentError, "the last two arguments must be a list of author structs and genre structs respectively.")
+      raise(
+        ArgumentError,
+        "the last two arguments must be a list of author structs and genre structs respectively."
+      )
     end
   end
 
@@ -57,7 +62,7 @@ defmodule BookTracker.Books.Book do
   end
 
   defp validate_non_empty_association(changeset, assoc_name) when is_atom(assoc_name) do
-    validate_change(changeset, assoc_name, fn _field, value -> 
+    validate_change(changeset, assoc_name, fn _field, value ->
       if value == [] or value == nil do
         [{assoc_name, "you must chose at least one"}]
       else

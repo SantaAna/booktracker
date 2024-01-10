@@ -362,6 +362,25 @@ defmodule BookTrackerWeb.CoreComponents do
     """
   end
 
+  def input(%{type: "radio"} = assigns) do
+    ~H"""
+    <div phx-feedback-for={@name}>
+      <.label for={@id}><%= @label %></.label>
+      <input
+        type={@type}
+        name={@name}
+        id={@id}
+        value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+        class={[
+          "mask mask-star-2"
+        ]}
+        {@rest}
+      />
+      <.error :for={msg <- @errors}><%= msg %></.error>
+    </div>
+    """
+  end
+
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""

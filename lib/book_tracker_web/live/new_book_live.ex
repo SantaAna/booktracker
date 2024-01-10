@@ -34,6 +34,8 @@ defmodule BookTrackerWeb.NewBookLive do
       <.input type="number" field={@book_form[:page_count]} label="Page Count" />
       <.input type="text" field={@book_form[:isbn10]} label="ISBN-10" />
       <.input type="text" field={@book_form[:isbn13]} label="ISBN-13" />
+      <.input type="date" field={@book_form[:last_read]} label="Last Read" />
+      <.rating field={@book_form[:rating]} />
       <div class="relative">
         <.live_component
           module={MatchAndSelect}
@@ -76,7 +78,7 @@ defmodule BookTrackerWeb.NewBookLive do
       </div>
       <p class="font-semibold">Summary</p>
       <p class="text-sm mb-3">accepts markdown input</p>
-      <.input type="textarea" field={@book_form[:summary]}/>
+      <.input type="textarea" field={@book_form[:summary]} />
       <button class="btn btn-primary mt-2">Save Book</button>
     </.form>
     <.add_new_modal id="new-genre-modal" title="Add Genre">
@@ -93,6 +95,48 @@ defmodule BookTrackerWeb.NewBookLive do
         <button class="btn btn-primary mt-2">Create Author</button>
       </.form>
     </.add_new_modal>
+    """
+  end
+
+  attr :field, :string, required: true
+
+  def rating(assigns) do
+    ~H"""
+    <fieldset class="mt-2 mb-2">
+      <legend>Book Rating</legend>
+        <div class="rating">
+          <.input
+            type="radio"
+            value="1"
+            class="mask mask-star-2"
+            field={@field}
+          />
+          <.input
+            type="radio"
+            value="2"
+            class="mask mask-star-2"
+            field={@field}
+          />
+          <.input
+            type="radio"
+            value="3"
+            class="mask mask-star-2"
+            field={@field}
+          />
+          <.input
+            type="radio"
+            value="4"
+            class="mask mask-star-2"
+            field={@field}
+          />
+          <.input
+            type="radio"
+            value="5"
+            class="mask mask-star-2"
+            field={@field}
+          />
+        </div>
+    </fieldset>
     """
   end
 
@@ -149,6 +193,7 @@ defmodule BookTrackerWeb.NewBookLive do
 
   def handle_event("author-submitted", %{"author" => params}, socket) do
     params = Map.update!(params, "bio_notes", &Markdown.transform_markdown/1)
+
     case Authors.create_author(params) do
       {:ok, _} ->
         socket
@@ -166,6 +211,8 @@ defmodule BookTrackerWeb.NewBookLive do
 
   def handle_event("book-submitted", %{"book" => params}, socket) do
     params = Map.update!(params, "summary", &Markdown.transform_markdown/1)
+    IO.inspect(params, label: "params passed to book")
+
     case Books.create_book(
            params,
            socket.assigns.selected_authors,
@@ -185,7 +232,8 @@ defmodule BookTrackerWeb.NewBookLive do
   end
 
   def handle_info({:selected_update, "authors", selected_list}, socket) do
-    {:noreply, assign(socket, :selected_authors, selected_list)} end
+    {:noreply, assign(socket, :selected_authors, selected_list)}
+  end
 
   def handle_info({:selected_update, "genres", selected_list}, socket) do
     {:noreply, assign(socket, :selected_genres, selected_list)}
