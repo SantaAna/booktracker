@@ -20,11 +20,9 @@ defmodule BookTrackerWeb.NewAuthorLive do
       <.input type="text" field={@author_form[:first_name]} label="First Name"/> 
       <.input type="text" field={@author_form[:last_name]} label="Last Name"/> 
       <.input type="hidden" field={@author_form[:bio_notes]} id="bio-notes"/>
-      <p class="mb-3 mt-3 font-semibold text-sm"> Author Notes </p>
-      <div phx-update="ignore" id="bio-editor">
-        <trix-editor for="bio-notes" class="pt-3">
-        </trix-editor>
-      </div>
+      <p class="font-semibold">Author Notes</p>
+      <p class="text-sm mb-3">accepts markdown input</p>
+      <.input type="textarea" field={@author_form[:bio_notes]}/>
     <.button class="mt-3"> Save Author </.button>
     </.form>
     """
@@ -33,6 +31,7 @@ defmodule BookTrackerWeb.NewAuthorLive do
   def get_events(), do: @events
 
   def handle_event("author-submitted", %{"author" => author_params}, socket) do
+    author_params = Map.update!(author_params, "bio_notes", &Markdown.transform_markdown/1)
     case Authors.create_author(author_params) do
       {:ok, _} -> 
         socket
