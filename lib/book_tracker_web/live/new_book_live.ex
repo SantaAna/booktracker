@@ -17,7 +17,6 @@ defmodule BookTrackerWeb.NewBookLive do
       Books.change_book(book)
       |> to_form()
 
-    IO.inspect(book, label: "the book")
     send_update(MatchAndSelect, id: "genre-select", selected_items: book.genres)
     send_update(MatchAndSelect, id: "author-select", selected_items: book.authors)
 
@@ -205,36 +204,70 @@ defmodule BookTrackerWeb.NewBookLive do
   end
 
   def handle_event("book-submitted", %{"book" => params}, socket) do
-    IO.inspect(params, label: "new book params")
 
-    db_update_result =
-      if book = socket.assigns[:book] do
-        Books.update_book(
+    action_wrap(socket, params)
+    |> maybe_create_book() 
+    |> maybe_update_book()
+    |> user_feedback()
+  end
+
+  defp action_wrap(socket, params) do
+    %{
+      action: nil,
+      socket: socket,
+      params: params
+    }
+  end
+ 
+  defp maybe_update_book(%{action: nil, socket: socket, params: params} = action) do
+    if book = socket.assigns[:book] do
+        result = Books.update_book(
           book,
           params,
           socket.assigns.selected_authors,
           socket.assigns.selected_genres
         )
-      else
-        Books.create_book(
+        action
+        |> Map.put(:action, :update)
+        |> Map.put(:result, result)
+    else
+      action
+    end
+  end
+  defp maybe_update_book(action), do: action
+
+  defp maybe_create_book(%{action: nil, socket: socket, params: params} = action) do
+    unless socket.assigns[:book] do
+        result = Books.create_book(
           params,
           socket.assigns.selected_authors,
           socket.assigns.selected_genres
         )
-      end
+        action
+        |> Map.put(:action, :create)
+        |> Map.put(:result, result)
+    else 
+      action
+    end 
+  end
+  defp maybe_create_book(action), do: action
+  
+  defp user_feedback(%{result: {:error, cs}, socket: socket}) do
+      {:noreply, assign(socket, :book_form, to_form(cs))}
+  end
 
-    case db_update_result do
-      {:ok, _} ->
+  defp user_feedback(%{result: {:ok, book}, action: :update, socket: socket}) do
         socket
-        |> put_flash(:info, "book added")
+        |> put_flash(:info, "book updated")
+        |> push_navigate(to: "/books/#{book.id}")
+        |> then(&{:noreply, &1})
+  end
+
+  defp user_feedback(%{result: {:ok, _}, action: :create, socket: socket}) do
+        socket
+        |> put_flash(:info, "book created")
         |> push_navigate(to: "/books/new")
         |> then(&{:noreply, &1})
-
-      {:error, cs} ->
-        IO.inspect(cs, label: "cs returned")
-        IO.inspect(to_form(cs)[:authors], label: "authors field")
-        {:noreply, assign(socket, :book_form, to_form(cs))}
-    end
   end
 
   def handle_info({:selected_update, "authors", selected_list}, socket) do
