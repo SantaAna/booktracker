@@ -13,8 +13,14 @@ defmodule BookTracker.Books.Book do
     field :isbn13, :string
     field :rating, :integer
     field :last_read, :date
-    many_to_many :authors, BookTracker.Authors.Author, join_through: "authors_books"
-    many_to_many :genres, BookTracker.Genres.Genre, join_through: "books_genres"
+
+    many_to_many :authors, BookTracker.Authors.Author,
+      join_through: "authors_books",
+      on_replace: :delete
+
+    many_to_many :genres, BookTracker.Genres.Genre,
+      join_through: "books_genres",
+      on_replace: :delete
 
     timestamps(type: :utc_datetime)
   end
@@ -22,7 +28,16 @@ defmodule BookTracker.Books.Book do
   @doc false
   def changeset(book, attrs) do
     book
-    |> cast(attrs, [:title, :page_count, :summary, :md_summary, :isbn10, :isbn13, :rating, :last_read])
+    |> cast(attrs, [
+      :title,
+      :page_count,
+      :summary,
+      :md_summary,
+      :isbn10,
+      :isbn13,
+      :rating,
+      :last_read
+    ])
     |> validate_required([:title])
   end
 

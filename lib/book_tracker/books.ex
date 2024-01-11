@@ -98,6 +98,12 @@ defmodule BookTracker.Books do
     |> Repo.update()
   end
 
+  def update_book(%Book{} = book, attrs, authors, genres) do
+    book
+    |> Book.changeset_with_authors_and_genres(attrs, authors, genres)
+    |> Repo.update()
+  end
+
   def add_author(
         %Book{} = book,
         author_info = %{"first_name" => _first_name, "last_name" => _last_name}
