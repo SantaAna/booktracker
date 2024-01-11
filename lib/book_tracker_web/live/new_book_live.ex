@@ -18,6 +18,8 @@ defmodule BookTrackerWeb.NewBookLive do
       |> to_form()
 
     IO.inspect(book, label: "the book")
+    send_update(MatchAndSelect, id: "genre-select", selected_items: book.genres)
+    send_update(MatchAndSelect, id: "author-select", selected_items: book.authors)
 
     socket
     |> assign(:book_form, book_change_form)
@@ -67,7 +69,6 @@ defmodule BookTrackerWeb.NewBookLive do
           match_label="Matching Genres"
           selected_label="Added to Book"
           form_field={@book_form[:genres]}
-          selected_items={@selected_genres}
         />
         <label
           class="btn btn-md btn-success ml-1 mt-9 absolute top-0 left-52"
@@ -88,7 +89,6 @@ defmodule BookTrackerWeb.NewBookLive do
           match_label="Matching Authors"
           selected_label="Added to Book"
           form_field={@book_form[:genres]}
-          selected_items={@selected_authors}
         />
         <label
           class="btn btn-md btn-success ml-1 mt-9 absolute top-0 left-52"
