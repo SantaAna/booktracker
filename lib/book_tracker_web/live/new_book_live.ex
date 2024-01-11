@@ -10,6 +10,26 @@ defmodule BookTrackerWeb.NewBookLive do
     "book-submitted" => "triggered when a user submits the new book form"
   }
 
+  def mount(%{"bookid" => book_id}, _, socket) do
+    book = Books.get_book(String.to_integer(book_id), [:genres, :authors])
+
+    book_change_form =
+      Books.change_book(book)
+      |> to_form()
+
+    IO.inspect(book, label: "the book")
+
+    socket
+    |> assign(:book_form, book_change_form)
+    |> assign_new_genre_form()
+    |> assign_new_author_form()
+    |> assign(:form_reset, false)
+    |> assign(:selected_authors, book.authors)
+    |> assign(:selected_genres, book.genres)
+    |> assign(:book, book)
+    |> then(&{:ok, &1})
+  end
+
   def mount(_, _, socket) do
     socket
     |> assign_new_book_form()
@@ -47,6 +67,7 @@ defmodule BookTrackerWeb.NewBookLive do
           match_label="Matching Genres"
           selected_label="Added to Book"
           form_field={@book_form[:genres]}
+          selected_items={@selected_genres}
         />
         <label
           class="btn btn-md btn-success ml-1 mt-9 absolute top-0 left-52"
@@ -67,6 +88,7 @@ defmodule BookTrackerWeb.NewBookLive do
           match_label="Matching Authors"
           selected_label="Added to Book"
           form_field={@book_form[:genres]}
+          selected_items={@selected_authors}
         />
         <label
           class="btn btn-md btn-success ml-1 mt-9 absolute top-0 left-52"
@@ -104,38 +126,13 @@ defmodule BookTrackerWeb.NewBookLive do
     ~H"""
     <fieldset class="mt-2 mb-2">
       <legend>Book Rating</legend>
-        <div class="rating">
-          <.input
-            type="radio"
-            value="1"
-            class="mask mask-star-2"
-            field={@field}
-          />
-          <.input
-            type="radio"
-            value="2"
-            class="mask mask-star-2"
-            field={@field}
-          />
-          <.input
-            type="radio"
-            value="3"
-            class="mask mask-star-2"
-            field={@field}
-          />
-          <.input
-            type="radio"
-            value="4"
-            class="mask mask-star-2"
-            field={@field}
-          />
-          <.input
-            type="radio"
-            value="5"
-            class="mask mask-star-2"
-            field={@field}
-          />
-        </div>
+      <div class="rating">
+        <.input type="radio" value="1" class="mask mask-star-2" field={@field} />
+        <.input type="radio" value="2" class="mask mask-star-2" field={@field} />
+        <.input type="radio" value="3" class="mask mask-star-2" field={@field} />
+        <.input type="radio" value="4" class="mask mask-star-2" field={@field} />
+        <.input type="radio" value="5" class="mask mask-star-2" field={@field} />
+      </div>
     </fieldset>
     """
   end
@@ -209,11 +206,19 @@ defmodule BookTrackerWeb.NewBookLive do
 
   def handle_event("book-submitted", %{"book" => params}, socket) do
     IO.inspect(params, label: "new book params")
-    case Books.create_book(
-           params,
-           socket.assigns.selected_authors,
-           socket.assigns.selected_genres
-         ) do
+
+    db_update_result =
+      if book = socket.assigns[:book] do
+        Books.update_book(book, params, socket.assigns.selected_authors, socket.assigns.selected_genres)
+      else
+        Books.create_book(
+          params,
+          socket.assigns.selected_authors,
+          socket.assigns.selected_genres
+        )
+      end
+
+    case db_update_result do
       {:ok, _} ->
         socket
         |> put_flash(:info, "book added")

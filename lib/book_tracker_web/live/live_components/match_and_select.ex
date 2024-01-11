@@ -28,10 +28,10 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
 
   def update(assigns, socket) do
     socket
-    |> assign(assigns)
     |> assign(:item_input, "")
     |> assign(:item_matches, [])
     |> assign(:selected_items, [])
+    |> assign(assigns)
     |> then(&{:ok, &1})
   end
 
@@ -91,8 +91,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
 
   attr :item, :map, required: true
   attr :target, :any, required: true
-
-  def item_selected(assigns) do
+def item_selected(assigns) do
     ~H"""
     <div
       phx-click="item-removed"
