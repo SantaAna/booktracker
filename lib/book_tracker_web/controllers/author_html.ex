@@ -5,6 +5,11 @@ defmodule BookTrackerWeb.AuthorHTML do
     ~H"""
     <.author_full_name author={@author} />
     <h2 class="font-semibold mb-3">Biography</h2>
+    <div class="mt-3">
+      <.link navigate={~p"/authors/new?#{%{authorid: @author.id}}"}>
+        <button class="btn">Edit</button>
+      </.link>
+    </div>
     <div>
       <%= raw(Markdown.transform_markdown(@author.md_bio_notes) || "No bio") %>
     </div>

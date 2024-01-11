@@ -209,7 +209,12 @@ defmodule BookTrackerWeb.NewBookLive do
 
     db_update_result =
       if book = socket.assigns[:book] do
-        Books.update_book(book, params, socket.assigns.selected_authors, socket.assigns.selected_genres)
+        Books.update_book(
+          book,
+          params,
+          socket.assigns.selected_authors,
+          socket.assigns.selected_genres
+        )
       else
         Books.create_book(
           params,

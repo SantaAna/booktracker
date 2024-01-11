@@ -1,12 +1,14 @@
-<h1 class="text-3xl"><%= @book.title%></h1>
+<h1 class="text-3xl"><%= @book.title %></h1>
 <div class="flex flex-row justify-between">
-<p> Authors: <%= Enum.map(@book.authors, & "#{&1.first_name} #{&1.last_name}") |> Enum.join(",")  %> </p>
-<p> Genres: <%= Enum.map(@book.genres, & "#{&1.name}") |> Enum.join(",")  %> </p>
+  <p>
+    Authors: <%= Enum.map(@book.authors, &"#{&1.first_name} #{&1.last_name}") |> Enum.join(",") %>
+  </p>
+  <p>Genres: <%= Enum.map(@book.genres, &"#{&1.name}") |> Enum.join(",") %></p>
 </div>
 <div class="mt-3">
-<.link navigate={~p"/books/new?#{%{bookid: @book.id}}"}>
-  <button class="btn"> Edit </button>
-</.link>
+  <.link navigate={~p"/books/new?#{%{bookid: @book.id}}"}>
+    <button class="btn">Edit</button>
+  </.link>
 </div>
 <h2 class="text-2xl mt-3">Summary</h2>
 <%= raw(Markdown.transform_markdown(@book.md_summary) || "No Summary") %>
