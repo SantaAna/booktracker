@@ -1,14 +1,15 @@
 <header>
-<div class="navbar bg-base-100 w-full">
-  <div class="flex-1">
-    <.link class="btn btn-ghost text-xl" navigate={~p"/books"}>Books</.link>
+  <div class="navbar bg-base-100 w-full">
+    <div class="flex-1">
+      <.link class="btn btn-ghost text-xl" navigate={~p"/books"}>Books</.link>
+    </div>
+    <div class="flex-none">
+      <ul class="menu menu-horizontal px-1">
+        <li><.link navigate={~p"/books/new"}>add book</.link></li>
+        <li><.link navigate={~p"/authors/new"}>add author</.link></li>
+      </>
+    </div>
   </div>
-  <div class="flex-none">
-    <ul class="menu menu-horizontal px-1">
-      <li><.link navigate={~p"/books/new"}>add book</.link></li>
-    </ul>
-  </div>
-</div>
 </header>
 <main class="px-4 py-20 sm:px-6 lg:px-8">
   <div class="mx-auto max-w-2xl">

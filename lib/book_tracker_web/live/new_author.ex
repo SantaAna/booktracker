@@ -31,10 +31,10 @@ defmodule BookTrackerWeb.NewAuthorLive do
     <.form for={@author_form} phx-submit="author-submitted">
       <.input type="text" field={@author_form[:first_name]} label="First Name" />
       <.input type="text" field={@author_form[:last_name]} label="Last Name" />
-      <p class="font-semibold">Author Notes</p>
-      <p class="text-sm mb-3">accepts markdown input</p>
+      <p class="font-semibold mt-3">Author Notes</p>
+      <p class="text-s">accepts markdown input</p>
       <.input type="textarea" field={@author_form[:md_bio_notes]} />
-      <.button class="mt-3">Save Author</.button>
+      <button class="btn btn-primary mt-3">Save Author</button>
     </.form>
     """
   end
