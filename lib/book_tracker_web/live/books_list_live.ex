@@ -35,6 +35,7 @@ defmodule BookTrackerWeb.BooksListLive do
     |> assign(:books, books)
     |> assign(:max_page, maximum_pages)
     |> assign(:params, params)
+    |> assign(:headers, ["Title", "Authors", "Genres", "Rating", "Pages", "Last Read"])
     |> then(&{:noreply, &1})
   end
 
@@ -66,22 +67,9 @@ defmodule BookTrackerWeb.BooksListLive do
     </div>
     <div class="pt-4">
       <table class="table table-zebra w-full">
-        <thead>
-          <tr>
-            <th :for={header <- ~w(Title Authors Genres Pages)}>
-              <%= header %>
-            </th>
-          </tr>
-        </thead>
+        <.table_head headers={@headers} />
         <tr :for={book <- @books}>
-          <td>
-            <.link navigate={~p"/books/#{book.id}"} class="link link-primary">
-              <%= book.title %>
-            </.link>
-          </td>
-          <td><.authors_to_links authors={book.authors} /></td>
-          <td><%= genres_to_names(book.genres) %></td>
-          <td><%= book.page_count %></td>
+          <.table_data :for={header <- @headers} book={book} header={header} />
         </tr>
       </table>
     </div>
@@ -115,6 +103,63 @@ defmodule BookTrackerWeb.BooksListLive do
       <label for={@id} class="label label-text"><%= @label %></label>
       <input class="input input-md input-bordered" type={@type} name={@id} id={@id} value={@value} />
     </div>
+    """
+  end
+
+  attr :headers, :list, required: true
+
+  def table_head(assigns) do
+    ~H"""
+    <thead>
+      <tr>
+        <th :for={header <- @headers}>
+          <%= header %>
+        </th>
+      </tr>
+    </thead>
+    """
+  end
+
+  attr :header, :string, required: true
+  attr :book, :map, required: true
+
+  def table_data(%{header: "Title"} = assigns) do
+    ~H"""
+    <td>
+      <.link navigate={~p"/books/#{@book.id}"} class="link link-primary">
+        <%= @book.title %>
+      </.link>
+    </td>
+    """
+  end
+
+  def table_data(%{header: "Authors"} = assigns) do
+    ~H"""
+    <td><.authors_to_links authors={@book.authors} /></td>
+    """
+  end
+
+  def table_data(%{header: "Genres"} = assigns) do
+    ~H"""
+    <td><%= genres_to_names(@book.genres) %></td>
+    """
+  end
+
+  def table_data(%{header: "Pages"} = assigns) do
+    ~H"""
+    <td><%= @book.page_count %></td>
+    """
+  end
+
+  def table_data(%{header: "Rating"} = assigns) do
+    ~H"""
+    <td><%= @book.rating %>/5</td>
+    """
+  end
+
+  def table_data(%{header: "Last Read"} = assigns) do
+    ~H"""
+    <td><%= if @book.last_read, do: Date.to_string(@book.last_read), else: "" %></td>
     """
   end
 
