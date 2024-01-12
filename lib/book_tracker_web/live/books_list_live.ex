@@ -72,7 +72,10 @@ defmodule BookTrackerWeb.BooksListLive do
               rating={@params["rating-value"]}
             />
           </div>
-          <button class="btn btn-primary mt-2">Submit</button>
+          <div class="flex flex-row gap-5 mt-3">
+            <button class="btn btn-primary">Submit</button>
+            <button type="button" class="btn btn-secondary" phx-click="clear-search-params">Clear</button>
+          </div>
         </form>
       </div>
     </div>
@@ -211,6 +214,10 @@ defmodule BookTrackerWeb.BooksListLive do
 
   def handle_event("search-params-updated", params, socket) do
     {:noreply, push_patch(socket, to: ~p"/books?#{params}")}
+  end
+
+  def handle_event("clear-search-params", _, socket) do
+    {:noreply, push_patch(socket, to: ~p"/books")}
   end
 
   defp extract_first_and_last(author_name) do
