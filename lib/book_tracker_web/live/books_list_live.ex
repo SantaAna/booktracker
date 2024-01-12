@@ -7,7 +7,9 @@ defmodule BookTrackerWeb.BooksListLive do
     "page" => "1",
     "author-name" => "",
     "genres" => "",
-    "title" => ""
+    "title" => "",
+    "rating-comparison" => "",
+    "rating-value" => ""
   }
 
   def mount(_, _, socket) do
@@ -17,7 +19,9 @@ defmodule BookTrackerWeb.BooksListLive do
   def handle_params(params, _uri, socket) do
     params = Map.merge(@default_params, params)
     [first_name, last_name] = extract_first_and_last(params["author-name"])
-    title = if params["title"] == "", do: nil, else: params["title"]
+    title = if (t = params["title"]) == "", do: nil, else: t
+    rating_comparison = if (rc = params["rating-comparison"]) == "", do: nil, else: rc
+    rating_value = if (rv = params["rating-value"]) == "", do: nil, else: rv
 
     genres = extract_genres(params["genres"])
 
@@ -28,9 +32,10 @@ defmodule BookTrackerWeb.BooksListLive do
         author_first_name: first_name,
         author_last_name: last_name,
         genres: genres,
-        title: title
+        title: title,
+        rating_comparison: rating_comparison,
+        rating_value: rating_value
       )
-
     socket
     |> assign(:books, books)
     |> assign(:max_page, maximum_pages)
@@ -60,13 +65,19 @@ defmodule BookTrackerWeb.BooksListLive do
               type="number"
               value={@params["page-size"]}
             />
+            <.rating_select
+              comparisons={["=", "<", ">"]}
+              comparison={@params["rating-comparison"]}
+              values={["", "1", "2", "3", "4", "5"]}
+              rating={@params["rating-value"]}
+            />
           </div>
           <button class="btn btn-primary mt-2">Submit</button>
         </form>
       </div>
     </div>
     <div class="pt-4">
-      <table class="table table-zebra w-full">
+      <table class="table table-zebra w-full table-lg">
         <.table_head headers={@headers} />
         <tr :for={book <- @books}>
           <.table_data :for={header <- @headers} book={book} header={header} />
@@ -153,13 +164,40 @@ defmodule BookTrackerWeb.BooksListLive do
 
   def table_data(%{header: "Rating"} = assigns) do
     ~H"""
-    <td><%= @book.rating %>/5</td>
+    <td><%= if rating = @book.rating, do: "#{rating}/5", else: "unrated" %></td>
     """
   end
 
   def table_data(%{header: "Last Read"} = assigns) do
     ~H"""
-    <td><%= if @book.last_read, do: Date.to_string(@book.last_read), else: "" %></td>
+    <td><%= if @book.last_read, do: Date.to_string(@book.last_read), else: "unread" %></td>
+    """
+  end
+
+  attr :comparisons, :list, required: true
+  attr :comparison, :string, required: true
+  attr :values, :list, required: true
+  attr :rating, :string, required: true
+
+  def rating_select(assigns) do
+    ~H"""
+    <label class="form-control">
+    <div class="label">
+      <div class="label-text">Rating</div>
+    </div>
+    <div class="flex flex-row gap-1">
+      <select
+        class="select select-bordered w-sm" 
+        id="rating-comparision"
+        name="rating-comparison"
+      >
+        <%= Phoenix.HTML.Form.options_for_select(@comparisons, @comparison) %>
+      </select>
+      <select class="select select-bordered w-sm" id="rating-value" name="rating-value">
+        <%= Phoenix.HTML.Form.options_for_select(@values, @rating) %>
+      </select>
+    </div>
+    </label>
     """
   end
 
