@@ -168,75 +168,49 @@ defmodule BookTracker.Books do
       author_first_name: nil,
       author_last_name: nil,
       genres: nil,
-      title: nil
+      title: nil,
+      rating_comparison: nil,
+      rating_value: nil
     ]
 
     options = Keyword.merge(defaults, options)
 
     q =
-      from b in Book, as: :book,
+      from b in Book,
+        as: :book,
         preload: [:authors, :genres]
 
     q
-    |> maybe_join_books_with_authors(options)
-    |> maybe_join_books_with_genres(options)
-    |> maybe_get_by_genres(options)
-    |> maybe_get_by_first_name(options)
-    |> maybe_get_by_last_name(options)
-    |> maybe_get_by_title(options)
-    |> distinct(true)
+    |> execute_if(options[:genres], &join_books_with_genres/1)
+    |> execute_if(
+      options[:author_first_name] || options[:author_last_name],
+      &join_books_with_authors/1
+    )
+    |> execute_if(options[:genres], &get_books_containing_genre(&1, options[:genres]))
+    |> execute_if(
+      options[:author_first_name],
+      &get_books_with_author_first_name(&1, options[:author_first_name])
+    )
+    |> execute_if(
+      options[:author_last_name],
+      &get_books_with_author_last_name(&1, options[:author_last_name])
+    )
+    |> execute_if(options[:title], &get_books_with_title(&1, options[:title]))
+    |> execute_if(
+      options[:rating_value] && options[:rating_comparison],
+      &get_books_with_rating(&1, options[:rating_comparison], options[:rating_value])
+    )
     |> then(
       &{maximum_page_count(&1, options[:page_size]),
        get_books_on_page(&1, options[:current_page], options[:page_size]) |> Repo.all()}
     )
   end
 
-
-  defp maybe_join_books_with_genres(q, options) do
-    if options[:genres] do
-      join_books_with_genres(q)
+  def execute_if(value, condition, transform) do
+    if condition do
+      transform.(value)
     else
-      q
-    end
-  end
-
-  defp maybe_join_books_with_authors(q, options) do
-    if options[:author_first_name] || options[:author_last_name] do
-      join_books_with_authors(q)
-    else
-      q
-    end
-  end
-
-  defp maybe_get_by_genres(q, options) do
-    if genres = options[:genres] do
-      get_books_containing_genre(q, genres)
-    else
-      q
-    end
-  end
-
-  defp maybe_get_by_first_name(q, options) do
-    if first_name = options[:author_first_name] do
-      get_books_with_author_first_name(q, first_name)
-    else
-      q
-    end
-  end
-
-  defp maybe_get_by_last_name(q, options) do
-    if last_name = options[:author_last_name] do
-      get_books_with_author_last_name(q, last_name)
-    else
-      q
-    end
-  end
-
-  defp maybe_get_by_title(q, options) do
-    if title = options[:title] do
-      get_books_with_title(q, title)
-    else
-      q
+      value
     end
   end
 
@@ -253,12 +227,28 @@ defmodule BookTracker.Books do
     from [book: b] in q,
       join: bg in "books_genres",
       on: b.id == bg.book_id,
-      join: g in Genre, as: :genre,
+      join: g in Genre,
+      as: :genre,
       on: g.id == bg.genre_id
   end
 
+  defp get_books_with_rating(q, "<", rating_value) do
+    from [book: b] in q,
+      where: b.rating < ^rating_value
+  end
+
+  defp get_books_with_rating(q, ">", rating_value) do
+    from [book: b] in q,
+      where: b.rating > ^rating_value
+  end
+
+  defp get_books_with_rating(q, "=", rating_value) do
+    from [book: b] in q,
+      where: b.rating == ^rating_value
+  end
+
   defp get_books_containing_genre(q, genres) when is_list(genres) do
-     from [genre: g] in q,
+    from [genre: g] in q,
       where: g.name in ^genres
   end
 
@@ -274,7 +264,7 @@ defmodule BookTracker.Books do
 
   defp get_books_with_title(q, title) do
     from [book: b] in q,
-     where: ilike(b.title, ^"#{title}%")
+      where: ilike(b.title, ^"#{title}%")
   end
 
   defp get_books_on_page(q, page_number, page_size)
