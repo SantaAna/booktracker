@@ -150,13 +150,13 @@ defmodule BookTrackerWeb.NewBookLive do
     <input type="checkbox" id={@id} class="modal-toggle" />
     <div class="modal" role="dialog">
       <div class="modal-box relative">
-        <div class="flex flex-row justify-end absolute -top-3 right-2">
+        <div class="flex flex-row justify-end absolute -top-1 right-5">
           <div class="modal-action ">
             <label
               for={@id}
-              class="bg-error text-error-content text-lg cursor-pointer rounded-full p-1 hover:bg-red-800"
+              class="bg-error text-error-content h-8 w-8 flex justify-center items-center text-center cursor-pointer rounded-full hover:bg-red-800"
             >
-              &#x1F7AE Close
+              <span>&#x1F7AE</span> 
             </label>
           </div>
         </div>
