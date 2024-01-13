@@ -44,6 +44,7 @@ defmodule BookTrackerWeb.LiveComponents.MatchAndSelect do
         name={@input_identifier}
         value=""
         field={@form_field}
+        autocomplete="off"
         phx-change="update-item"
         phx-debounce="500"
         phx-target={@myself}

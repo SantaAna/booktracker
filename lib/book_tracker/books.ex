@@ -160,6 +160,11 @@ defmodule BookTracker.Books do
   - `:current_page` - the page of results that should be returned, defaults to 1
   - `:author_first_name` - the first name of the author, will be searched using postgres like. Defaults to nil in which case no first name filtering is performed.
   - `:author_last_name` - the last name of the author, will be searched using postgres like. Defaults to nil in which case no last name filtering is performed.
+  - `:genres` - list of generes to check books against.  By default will return 
+    any book that contains at least one of the listed genres.
+  - `title` - title for searching books.
+  - `rating_comparison` - the comparison operator to use when filtering books by rating.  Valid values are"<",">", and "="
+  - `rating_value` - the rating to be compared with the rating comparsion.
   """
   def search(options) do
     defaults = [
