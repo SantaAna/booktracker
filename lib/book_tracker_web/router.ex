@@ -17,7 +17,7 @@ defmodule BookTrackerWeb.Router do
   scope "/", BookTrackerWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", BooksListLive 
 
     live "/books", BooksListLive 
     live "/books/new", NewBookLive
